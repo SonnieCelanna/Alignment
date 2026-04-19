@@ -3081,7 +3081,7 @@ async function exportPNG() {
   const titleOffset = 115;
   ctx.save();
   ctx.translate(0, titleOffset);
-  drawFieldToCanvas(ctx, outerW, outerH, offsetX, offsetY, fieldW, fieldH, portraitImages);
+  drawFieldToCanvas(ctx, outerW, outerH, offsetX, offsetY, fieldW, fieldH, portraitImages, scale);
   ctx.restore();
 
   // Watermark
@@ -3194,7 +3194,8 @@ function exportStackedPNG(portraitImages) {
       const mult = typeof c.sizeMult === 'number' ? c.sizeMult : 1;
 
       if (c.portrait && portraitImages[c.id]) {
-        const radius = 22 * scale * 0.7 * mult;
+        // Match CSS: .token.has-portrait is 44px diameter at mult=1
+        const radius = 22 * scale * mult;
         const img = portraitImages[c.id];
         ctx.save();
         ctx.beginPath();
@@ -3206,32 +3207,28 @@ function exportStackedPNG(portraitImages) {
         ctx.beginPath();
         ctx.arc(tokenX, tokenY, radius, 0, Math.PI * 2);
         ctx.strokeStyle = c.factionId ? color : '#1a1512';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(tokenX, tokenY, radius, 0, Math.PI * 2);
-        ctx.strokeStyle = '#1a1512';
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 2 * scale;
         ctx.stroke();
         // Name below
-        const nameFontPx = 10 * scale * 0.7 * mult;
+        const nameFontPx = 10.4 * scale * mult; // matches 0.65rem
         ctx.font = `${nameFontPx}px "Cinzel", serif`;
         const textW = ctx.measureText(c.name).width;
-        const labelY = tokenY + radius + 10 * scale * 0.5 * mult;
-        const labelH = 16 * mult;
+        const labelY = tokenY + radius + 10 * scale * mult;
+        const labelH = 16 * scale * mult;
         ctx.fillStyle = 'rgba(26,21,18,0.85)';
-        ctx.fillRect(tokenX - textW / 2 - 6 * mult, labelY - labelH / 2, textW + 12 * mult, labelH);
+        ctx.fillRect(tokenX - textW / 2 - 6 * scale * mult, labelY - labelH / 2, textW + 12 * scale * mult, labelH);
         ctx.fillStyle = '#e8dcc4';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(c.name, tokenX, labelY);
       } else {
-        const fontPx = 11 * scale * 0.7 * mult;
+        // Match CSS: 0.65rem font, 3px/10px padding, 24px min-height at mult=1
+        const fontPx = 10.4 * scale * mult;
         ctx.font = `bold ${fontPx}px "Cinzel", serif`;
         const textW = ctx.measureText(c.name).width;
-        const padX = 10 * mult;
+        const padX = 10 * scale * mult;
         const pillW = textW + padX * 2;
-        const pillH = 22 * scale * 0.7 * mult;
+        const pillH = 24 * scale * mult;
         const r = pillH / 2;
         ctx.beginPath();
         ctx.moveTo(tokenX - pillW / 2 + r, tokenY - pillH / 2);
@@ -3243,7 +3240,7 @@ function exportStackedPNG(portraitImages) {
         ctx.fillStyle = color;
         ctx.fill();
         ctx.strokeStyle = '#1a1512';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.5 * scale;
         ctx.stroke();
         ctx.fillStyle = getContrastColor(color);
         ctx.textAlign = 'center';
@@ -3270,7 +3267,7 @@ function exportStackedPNG(portraitImages) {
   });
 }
 
-function drawFieldToCanvas(ctx, outerW, outerH, offX, offY, W, H, portraitImages = {}) {
+function drawFieldToCanvas(ctx, outerW, outerH, offX, offY, W, H, portraitImages = {}, scale = 1) {
   // Draw field inset within outer canvas
   ctx.save();
   ctx.translate(offX, offY);
@@ -3403,8 +3400,8 @@ function drawFieldToCanvas(ctx, outerW, outerH, offX, offY, W, H, portraitImages
     const mult = typeof c.sizeMult === 'number' ? c.sizeMult : 1;
 
     if (c.portrait && portraitImages[c.id]) {
-      // Circular portrait with name below
-      const radius = 32 * mult;
+      // Circular portrait with name below — matches CSS: 44px diameter at mult=1
+      const radius = 22 * scale * mult;
       const img = portraitImages[c.id];
 
       ctx.save();
@@ -3415,41 +3412,36 @@ function drawFieldToCanvas(ctx, outerW, outerH, offX, offY, W, H, portraitImages
       ctx.drawImage(img, x - radius, y - radius, radius*2, radius*2);
       ctx.restore();
 
-      // Border
+      // Border — matches CSS: 2px solid ink + 1px gold glow
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, Math.PI*2);
       ctx.strokeStyle = c.factionId ? color : '#1a1512';
-      ctx.lineWidth = 4;
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, Math.PI*2);
-      ctx.strokeStyle = '#1a1512';
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 2 * scale;
       ctx.stroke();
 
       // Name label under portrait
-      const fontPx = 13 * mult;
+      const fontPx = 10.4 * scale * mult; // 0.65rem ≈ 10.4px
       ctx.font = `${fontPx}px "Cinzel", serif`;
       const textW = ctx.measureText(c.name).width;
-      const labelY = y + radius + 14 * mult;
-      const labelH = 18 * mult;
+      const labelY = y + radius + 10 * scale * mult;
+      const labelH = 16 * scale * mult;
       ctx.fillStyle = 'rgba(26, 21, 18, 0.85)';
-      ctx.fillRect(x - textW/2 - 8 * mult, labelY - labelH/2, textW + 16 * mult, labelH);
+      ctx.fillRect(x - textW/2 - 6 * scale * mult, labelY - labelH/2, textW + 12 * scale * mult, labelH);
       ctx.strokeStyle = 'rgba(184, 137, 58, 0.5)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x - textW/2 - 8 * mult, labelY - labelH/2, textW + 16 * mult, labelH);
+      ctx.lineWidth = 1 * scale;
+      ctx.strokeRect(x - textW/2 - 6 * scale * mult, labelY - labelH/2, textW + 12 * scale * mult, labelH);
       ctx.fillStyle = '#e8dcc4';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(c.name, x, labelY);
     } else {
-      // Pill with name
-      const fontPx = 14 * mult;
+      // Pill with name — matches CSS: font-size 0.65rem, padding 3px 10px, min-height 24px at mult=1
+      const fontPx = 10.4 * scale * mult; // 0.65rem ≈ 10.4px
       ctx.font = `bold ${fontPx}px "Cinzel", serif`;
       const textW = ctx.measureText(c.name).width;
-      const padX = 14 * mult;
+      const padX = 10 * scale * mult;
       const pillW = textW + padX * 2;
-      const pillH = 26 * mult;
+      const pillH = 24 * scale * mult;
       const radius = pillH / 2;
 
       ctx.beginPath();
@@ -3462,11 +3454,11 @@ function drawFieldToCanvas(ctx, outerW, outerH, offX, offY, W, H, portraitImages
       ctx.fillStyle = color;
       ctx.fill();
       ctx.strokeStyle = '#1a1512';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 1.5 * scale;
       ctx.stroke();
 
       ctx.fillStyle = getContrastColor(color);
-      ctx.font = 'bold 14px "Cinzel", serif';
+      ctx.font = `bold ${fontPx}px "Cinzel", serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(c.name, x, y);
