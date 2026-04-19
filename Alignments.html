@@ -1,0 +1,3659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alignments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1512;
+    --parchment: #e8dcc4;
+    --parchment-light: #f2e8d0;
+    --parchment-dark: #d4c5a3;
+    --crimson: #8b1a1a;
+    --crimson-deep: #5c0f0f;
+    --gold: #b8893a;
+    --gold-bright: #d4a747;
+    --oxblood: #3a0f0f;
+    --moss: #4a5c3a;
+    --indigo: #2a3a5c;
+    --bone: #c8b896;
+    --shadow: rgba(26, 21, 18, 0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: 'Cormorant Garamond', serif;
+    background: var(--ink);
+    color: var(--parchment);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(139, 26, 26, 0.15), transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(184, 137, 58, 0.1), transparent 50%),
+      repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(232, 220, 196, 0.015) 2px, rgba(232, 220, 196, 0.015) 4px);
+  }
+
+  /* HEADER */
+  header {
+    padding: 1.75rem 3rem 1.25rem;
+    border-bottom: 1px solid rgba(184, 137, 58, 0.25);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1rem;
+    position: relative;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 32%;
+    height: 1px;
+    background: linear-gradient(to right, var(--crimson), transparent);
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 3rem;
+    width: 60px;
+    height: 2px;
+    background: var(--crimson);
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .brand-pretitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.7;
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-weight: 500;
+    font-size: 2.1rem;
+    letter-spacing: 0.15em;
+    color: var(--parchment-light);
+    text-transform: uppercase;
+    line-height: 1;
+    margin-top: 0.15rem;
+  }
+
+  .session-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  /* LAYOUT */
+  main {
+    display: grid;
+    grid-template-columns: 310px 1fr 300px;
+    gap: 0;
+    min-height: calc(100vh - 110px);
+  }
+
+  .panel {
+    padding: 1.75rem 1.5rem 1.5rem;
+    border-right: 1px solid rgba(184, 137, 58, 0.2);
+    overflow-y: auto;
+    max-height: calc(100vh - 110px);
+  }
+
+  .panel.left {
+    border-left: 3px solid var(--crimson-deep);
+    padding-left: 1.35rem;
+  }
+
+  .panel.right {
+    border-right: none;
+    border-left: 1px solid rgba(184, 137, 58, 0.2);
+    background:
+      linear-gradient(to right, rgba(139, 26, 26, 0.03), transparent 40%),
+      transparent;
+  }
+
+  .canvas-area {
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: auto;
+  }
+
+  /* PANEL SECTIONS */
+  .section {
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.35rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-weight: 500;
+  }
+
+  /* Remove the repetitive dotted underline and ◆ bullet — let the whitespace do the work */
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(184, 137, 58, 0.3), transparent);
+    margin-left: 0.5rem;
+  }
+
+  /* FORM ELEMENTS */
+  label {
+    display: block;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bone);
+    margin-bottom: 0.35rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  input[type="text"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    background: rgba(232, 220, 196, 0.05);
+    border: 1px solid rgba(184, 137, 58, 0.3);
+    color: var(--parchment);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    border-radius: 0;
+    transition: all 0.2s ease;
+  }
+
+  input[type="text"]:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--gold-bright);
+    background: rgba(232, 220, 196, 0.1);
+    box-shadow: 0 0 0 1px rgba(212, 167, 71, 0.3);
+  }
+
+  select option {
+    background: var(--ink);
+    color: var(--parchment);
+  }
+
+  textarea {
+    min-height: 60px;
+    resize: vertical;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .field-row {
+    margin-bottom: 0.85rem;
+  }
+
+  .field-row-inline {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+  }
+
+  /* BUTTONS */
+  button, .btn {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--parchment);
+    padding: 0.5rem 1rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+  }
+
+  button:hover, .btn:hover {
+    background: var(--gold);
+    color: var(--ink);
+  }
+
+  button.primary {
+    background: var(--crimson);
+    border-color: var(--crimson);
+    color: var(--parchment-light);
+  }
+
+  button.primary:hover {
+    background: var(--crimson-deep);
+    border-color: var(--crimson-deep);
+  }
+
+  button.ghost {
+    border-color: rgba(184, 137, 58, 0.4);
+    color: var(--bone);
+    font-size: 0.7rem;
+    padding: 0.4rem 0.7rem;
+  }
+
+  button.danger:hover {
+    background: var(--crimson);
+    border-color: var(--crimson);
+    color: var(--parchment);
+  }
+
+  button.tiny {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.55rem;
+  }
+
+  .button-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  /* FRAMEWORK TYPE SELECTOR */
+  .type-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .type-option {
+    padding: 0.65rem 0.4rem;
+    border: 1px solid rgba(184, 137, 58, 0.3);
+    background: rgba(232, 220, 196, 0.03);
+    text-align: center;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    color: var(--bone);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    z-index: 2;
+  }
+
+  .type-option:hover {
+    border-color: var(--gold);
+    color: var(--parchment);
+  }
+
+  .type-option.active {
+    border-color: var(--crimson);
+    background: rgba(139, 26, 26, 0.2);
+    color: var(--parchment-light);
+  }
+
+  .type-option .icon {
+    display: block;
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
+    color: var(--gold);
+  }
+
+  /* AXIS CONFIGURATION */
+  .axis-config {
+    padding: 0.85rem 0.9rem 0.75rem;
+    background: rgba(232, 220, 196, 0.025);
+    border-left: 2px solid rgba(184, 137, 58, 0.4);
+    margin-bottom: 0.85rem;
+  }
+
+  .axis-config-header {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--bone);
+    margin-bottom: 0.6rem;
+    opacity: 0.85;
+  }
+
+  /* CANVAS */
+  .canvas-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.15em;
+    color: var(--parchment-light);
+    text-align: center;
+    margin-bottom: 0.3rem;
+  }
+
+  .canvas-subtitle {
+    text-align: center;
+    color: var(--bone);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    opacity: 0.7;
+  }
+
+  .framework-canvas {
+    position: relative;
+    width: 100%;
+    max-width: 920px;
+    padding: 50px 70px;
+  }
+
+  .framework-canvas.line-1d {
+    padding: 65px 90px;
+  }
+
+  .field-inner {
+    background:
+      radial-gradient(ellipse at center, rgba(232, 220, 196, 0.06), transparent 70%),
+      rgba(232, 220, 196, 0.02);
+    border: 1px solid rgba(184, 137, 58, 0.25);
+    position: relative;
+    width: 100%;
+    box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.4);
+  }
+
+  .framework-canvas.grid-2d .field-inner,
+  .framework-canvas.grid-9grid .field-inner,
+  .framework-canvas.grid-3d-canvas .field-inner,
+  .framework-canvas.custom-canvas .field-inner {
+    aspect-ratio: 1;
+  }
+
+  .framework-canvas.line-1d .field-inner {
+    aspect-ratio: 6;
+    min-height: 80px;
+  }
+
+  .framework-canvas.stacked-canvas {
+    max-width: 100%;
+    padding: 50px 40px;
+  }
+
+  .framework-canvas.stacked-canvas .field-inner {
+    aspect-ratio: unset;
+    display: flex;
+    gap: 24px;
+    justify-content: flex-start;
+    align-items: stretch;
+    min-height: 380px;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    padding: 30px 10px 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+  }
+
+  .framework-canvas.stacked-canvas .field-inner::-webkit-scrollbar {
+    height: 10px;
+  }
+  .framework-canvas.stacked-canvas .field-inner::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.3);
+  }
+  .framework-canvas.stacked-canvas .field-inner::-webkit-scrollbar-thumb {
+    background: rgba(184,137,58,0.4);
+  }
+
+  .stack-layer {
+    flex: 0 0 360px;      /* fixed width instead of flex-growing */
+    min-width: 360px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .stack-layer-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 8px;
+    padding: 4px 8px;
+    border: 1px solid rgba(184, 137, 58, 0.3);
+    background: rgba(26, 21, 18, 0.5);
+    cursor: text;
+  }
+
+  .stack-layer-label:hover {
+    border-color: var(--gold);
+  }
+
+  .stack-layer-grid {
+    flex: 1 1 auto;
+    aspect-ratio: 1;
+    background:
+      radial-gradient(ellipse at center, rgba(232, 220, 196, 0.06), transparent 70%),
+      rgba(232, 220, 196, 0.02);
+    border: 1px solid rgba(184, 137, 58, 0.25);
+    position: relative;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .stack-controls {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    justify-content: center;
+  }
+
+  /* AXIS LINES AND LABELS */
+  .axis-line {
+    position: absolute;
+    background: rgba(184, 137, 58, 0.4);
+    pointer-events: none;
+  }
+
+  .axis-line.horizontal {
+    height: 1px;
+    left: 8%;
+    right: 8%;
+    top: 50%;
+  }
+
+  .axis-line.vertical {
+    width: 1px;
+    top: 8%;
+    bottom: 8%;
+    left: 50%;
+  }
+
+  .axis-line.diagonal {
+    transform-origin: center;
+    background: rgba(184, 137, 58, 0.3);
+  }
+
+  .axis-tick {
+    position: absolute;
+    background: rgba(184, 137, 58, 0.25);
+    pointer-events: none;
+  }
+
+  .axis-label {
+    position: absolute;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .axis-label.italic {
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.05em;
+    font-size: 0.9rem;
+    text-transform: none;
+    color: var(--bone);
+  }
+
+  /* CHARACTER TOKENS */
+  .token {
+    position: absolute;
+    height: auto;
+    min-height: 24px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--parchment);
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    font-weight: 500;
+    cursor: grab;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55), inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+    border: 1.5px solid var(--ink);
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+    z-index: 10;
+    user-select: none;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    max-width: 140px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .token.has-portrait {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    text-indent: -9999px;
+    border: 2px solid var(--ink);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(184, 137, 58, 0.4);
+  }
+
+  .token.has-portrait::after {
+    content: attr(data-name);
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-indent: 0;
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    color: var(--parchment);
+    background: rgba(26, 21, 18, 0.85);
+    padding: 1px 6px;
+    border-radius: 2px;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    border: 1px solid rgba(184, 137, 58, 0.4);
+  }
+
+  .token.has-portrait:hover::after,
+  .token.has-portrait.selected::after {
+    opacity: 1;
+  }
+
+  .token.has-portrait:hover {
+    box-shadow: 0 4px 16px rgba(139, 26, 26, 0.6), 0 0 0 2px var(--gold);
+  }
+
+  .token:hover {
+    transform: translate(-50%, -50%) scale(1.15);
+    box-shadow: 0 5px 20px rgba(139, 26, 26, 0.5), inset 0 -1px 3px rgba(0, 0, 0, 0.2);
+    z-index: 20;
+  }
+
+  .token.dragging {
+    cursor: grabbing;
+    z-index: 100;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+
+  .token.selected {
+    outline: 2px solid var(--gold-bright);
+    outline-offset: 3px;
+  }
+
+  .token .initials {
+    pointer-events: none;
+  }
+
+  .token-name-tooltip {
+    display: none;
+  }
+
+  /* CHARACTER LIST */
+  .character-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .character-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.6rem;
+    background: rgba(232, 220, 196, 0.04);
+    border: 1px solid rgba(184, 137, 58, 0.15);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .character-item:hover {
+    background: rgba(232, 220, 196, 0.08);
+    border-color: rgba(184, 137, 58, 0.4);
+  }
+
+  .character-item.selected {
+    border-color: var(--crimson);
+    background: rgba(139, 26, 26, 0.12);
+  }
+
+  .character-swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--ink);
+    flex-shrink: 0;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .portrait-uploader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .portrait-preview {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    border: 2px solid rgba(184, 137, 58, 0.4);
+    background: rgba(232, 220, 196, 0.1);
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bone);
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .portrait-preview:hover {
+    border-color: var(--gold);
+    background-color: rgba(232, 220, 196, 0.15);
+  }
+
+  .portrait-preview.has-image {
+    color: transparent;
+  }
+
+  .portrait-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  /* CROP EDITOR */
+  .crop-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 360px;
+    margin: 0 auto 1rem;
+    background: #000;
+    overflow: hidden;
+    border: 1px solid rgba(184, 137, 58, 0.3);
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .crop-stage.grabbing {
+    cursor: grabbing;
+  }
+
+  #crop-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+    pointer-events: none;
+    max-width: none;
+  }
+
+  .crop-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center,
+      transparent 0,
+      transparent 45%,
+      rgba(0, 0, 0, 0.65) 46%,
+      rgba(0, 0, 0, 0.65) 100%);
+    pointer-events: none;
+  }
+
+  .crop-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90%;
+    height: 90%;
+    transform: translate(-50%, -50%);
+    border: 2px dashed rgba(184, 137, 58, 0.7);
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+  }
+
+  .crop-controls {
+    margin-top: 1rem;
+  }
+
+  .character-name {
+    flex: 1;
+    font-size: 1rem;
+    color: var(--parchment);
+  }
+
+  .character-coords {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--bone);
+    opacity: 0.7;
+  }
+
+  .character-item .remove {
+    opacity: 0;
+    transition: opacity 0.15s;
+    background: none;
+    border: none;
+    color: var(--crimson);
+    cursor: pointer;
+    padding: 0 4px;
+    font-size: 1rem;
+  }
+
+  .character-item:hover .remove {
+    opacity: 1;
+  }
+
+  /* FACTIONS */
+  .faction-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    background: rgba(232, 220, 196, 0.04);
+    margin-bottom: 0.3rem;
+    border: 1px solid rgba(184, 137, 58, 0.15);
+  }
+
+  .color-picker-inline {
+    width: 22px;
+    height: 22px;
+    border: 1px solid rgba(184, 137, 58, 0.4);
+    cursor: pointer;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0;
+    border: none;
+    background: none;
+  }
+  input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  input[type="color"]::-webkit-color-swatch { border: 1px solid rgba(184, 137, 58, 0.5); border-radius: 0; }
+
+  .faction-name-input {
+    flex: 1;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.9rem;
+    background: transparent;
+    border: 1px solid transparent;
+  }
+  .faction-name-input:focus {
+    background: rgba(232, 220, 196, 0.08);
+    border-color: rgba(184, 137, 58, 0.3);
+  }
+
+  /* DETAILS PANEL */
+  .detail-empty {
+    text-align: center;
+    color: var(--bone);
+    font-style: italic;
+    opacity: 0.5;
+    padding: 2rem 0;
+    font-size: 1rem;
+  }
+
+  .coords-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--gold-bright);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.4rem 0.6rem;
+    border-left: 2px solid var(--gold);
+    margin-bottom: 0.6rem;
+  }
+
+  .coord-slider-row {
+    margin-bottom: 0.6rem;
+  }
+
+  .coord-slider-row label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.2rem;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    height: 3px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(184, 137, 58, 0.3);
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--gold-bright);
+    cursor: pointer;
+    border-radius: 50%;
+    border: 1px solid var(--ink);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--gold-bright);
+    cursor: pointer;
+    border-radius: 50%;
+    border: 1px solid var(--ink);
+  }
+
+  /* MODAL */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .modal-backdrop.active { display: flex; }
+
+  .modal {
+    background: var(--ink);
+    border: 1px solid var(--gold);
+    padding: 2rem;
+    max-width: 560px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(184, 137, 58, 0.3);
+    position: relative;
+  }
+
+  .modal h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dotted rgba(184, 137, 58, 0.3);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--bone);
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .saved-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(232, 220, 196, 0.04);
+    border: 1px solid rgba(184, 137, 58, 0.2);
+    margin-bottom: 0.5rem;
+  }
+
+  .saved-item-info h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    color: var(--parchment-light);
+    margin-bottom: 0.2rem;
+    letter-spacing: 0.05em;
+  }
+
+  .saved-item-info p {
+    font-size: 0.8rem;
+    color: var(--bone);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--ink);
+    border: 1px solid var(--gold);
+    color: var(--parchment);
+    padding: 0.75rem 1.5rem;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.1em;
+    font-size: 0.85rem;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 2000;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); }
+  ::-webkit-scrollbar-thumb { background: rgba(184, 137, 58, 0.3); }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(184, 137, 58, 0.5); }
+
+  /* RESPONSIVE */
+  @media (max-width: 1100px) {
+    main {
+      grid-template-columns: 1fr;
+    }
+    .panel {
+      max-height: none;
+      border-right: none;
+      border-bottom: 1px solid rgba(184, 137, 58, 0.2);
+    }
+    .panel.right {
+      border-left: none;
+      border-bottom: none;
+    }
+  }
+
+  .ornament {
+    text-align: center;
+    color: var(--gold);
+    opacity: 0.3;
+    margin: 1.5rem 0;
+    letter-spacing: 1em;
+    font-size: 0.8rem;
+  }
+
+  .helper-text {
+    font-size: 0.8rem;
+    color: var(--bone);
+    opacity: 0.6;
+    font-style: italic;
+    margin-top: 0.3rem;
+  }
+
+  /* 3-axis triangle guides */
+  .triangle-guide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>Alignments</h1>
+  </div>
+  <div class="session-controls">
+    <button class="ghost" id="btn-new">New</button>
+    <button class="ghost" id="btn-save">Save</button>
+    <button class="ghost" id="btn-load">Load</button>
+    <span style="width:1px;height:20px;background:rgba(184,137,58,0.3);margin:0 0.3rem;"></span>
+    <button class="ghost" id="btn-export" style="border-color: var(--gold-bright); color: var(--parchment-light);">Export</button>
+  </div>
+</header>
+
+<main>
+  <!-- LEFT PANEL: FRAMEWORK CONFIGURATION -->
+  <aside class="panel left">
+    <div class="section">
+      <div class="section-title">Framework Name</div>
+      <input type="text" id="framework-name" placeholder="The Ashen Covenant..." value="Untitled Framework">
+    </div>
+
+    <div class="section">
+      <div class="section-title">Presets</div>
+      <select id="preset-selector">
+        <option value="">— Choose a preset —</option>
+        <optgroup label="Classic">
+          <option value="dnd-9grid">D&D 9-Grid (Law/Chaos × Good/Evil)</option>
+          <option value="simple-linear">Good ↔ Evil (Linear)</option>
+        </optgroup>
+        <optgroup label="Vigilante / Hero Frameworks">
+          <option value="vigilante-ends-means">Ends vs. Means (Cross)</option>
+          <option value="vigilante-9grid">Vigilante 9-Grid (Methods × Motives)</option>
+          <option value="vigilante-stacked">Factional Alignment (Stacked)</option>
+          <option value="vigilante-triangle">Justice Triangle (Law / Revenge / Mercy)</option>
+          <option value="vigilante-radar">Vigilante Radar (5 traits)</option>
+        </optgroup>
+        <optgroup label="Other">
+          <option value="loyalty-linear">Loyalty Spectrum</option>
+          <option value="political-compass">Political Compass</option>
+        </optgroup>
+      </select>
+      <p class="helper-text">Applies axes and labels — characters stay as-is.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Geometry</div>
+      <div class="type-grid">
+        <div class="type-option active" data-type="1d">Linear</div>
+        <div class="type-option" data-type="2d">Cross</div>
+        <div class="type-option" data-type="9grid">9-Grid</div>
+        <div class="type-option" data-type="9stack">Stacked</div>
+        <div class="type-option" data-type="3d">Triangle</div>
+        <div class="type-option" data-type="custom">Custom</div>
+      </div>
+      <p class="helper-text" id="geometry-hint">A single spectrum between two opposing poles.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Axes</div>
+      <div id="axes-container"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Factions</div>
+      <div id="factions-container"></div>
+      <button class="ghost tiny" id="btn-add-faction" style="margin-top: 0.5rem;">+ Add Faction</button>
+    </div>
+  </aside>
+
+  <!-- CENTER: CANVAS -->
+  <section class="canvas-area">
+    <div class="canvas-title" id="canvas-title">Untitled Framework</div>
+    <div class="canvas-subtitle" id="canvas-subtitle">Drag characters onto the field</div>
+    <div class="framework-canvas line-1d" id="canvas"></div>
+    <p class="helper-text" style="margin-top: 1rem; text-align: center;">
+      Drag tokens to reposition. Click a token to select and edit.
+    </p>
+  </section>
+
+  <!-- RIGHT PANEL: CHARACTERS -->
+  <aside class="panel right">
+    <div class="section">
+      <div class="section-title">Add Character</div>
+      <div class="field-row">
+        <input type="text" id="new-char-name" placeholder="Character name...">
+      </div>
+      <div class="field-row-inline">
+        <select id="new-char-faction">
+          <option value="">— No Faction —</option>
+        </select>
+        <button class="primary" id="btn-add-char">+ Add</button>
+      </div>
+      <button class="ghost tiny" id="btn-bulk-add">Bulk Import</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Roster <span id="char-count" style="opacity: 0.5; margin-left: auto; font-family: 'JetBrains Mono', monospace;">(0)</span></div>
+      <div class="character-list" id="character-list">
+        <p class="detail-empty">No characters yet.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Selected</div>
+      <div id="detail-panel">
+        <p class="detail-empty">Select a character to edit their position, notes, and faction.</p>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<!-- MODALS -->
+<div class="modal-backdrop" id="modal-load">
+  <div class="modal">
+    <button class="modal-close" data-close>✕</button>
+    <h2>Saved Frameworks</h2>
+    <div id="saved-list"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-bulk">
+  <div class="modal">
+    <button class="modal-close" data-close>✕</button>
+    <h2>Bulk Import</h2>
+    <p style="margin-bottom: 0.5rem; color: var(--bone); font-style: italic;">One name per line. They'll be placed at the center — drag them into position afterward.</p>
+    <textarea id="bulk-names" style="min-height: 200px;" placeholder="Aric the Bold&#10;Saoirse Vane&#10;Brother Kael&#10;..."></textarea>
+    <div class="field-row-inline" style="margin-top: 1rem;">
+      <select id="bulk-faction">
+        <option value="">— No Faction —</option>
+      </select>
+      <button class="primary" id="btn-bulk-confirm">Import</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-crop">
+  <div class="modal" style="max-width: 500px;">
+    <button class="modal-close" data-close>✕</button>
+    <h2>Adjust Portrait</h2>
+    <p style="color: var(--bone); font-style: italic; margin-bottom: 1rem; font-size: 0.9rem;">Drag the image to reposition. Use the slider or scroll to zoom.</p>
+    <div class="crop-stage" id="crop-stage">
+      <img id="crop-image" alt="portrait source" draggable="false">
+      <div class="crop-overlay"></div>
+      <div class="crop-circle"></div>
+    </div>
+    <div class="crop-controls">
+      <label style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.75rem;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">−</span>
+        <input type="range" id="crop-zoom" min="0.3" max="5" step="0.05" value="1" style="flex:1;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">+</span>
+      </label>
+      <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+        <button class="ghost" id="crop-reset">Reset</button>
+        <button class="ghost" data-close>Cancel</button>
+        <button class="primary" id="crop-save">Save Crop</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-confirm">
+  <div class="modal" style="max-width: 440px;">
+    <h2 id="confirm-title">Confirm</h2>
+    <p id="confirm-message" style="margin-bottom: 1.5rem; color: var(--parchment); line-height: 1.5;"></p>
+    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+      <button class="ghost" id="confirm-cancel">Cancel</button>
+      <button class="primary" id="confirm-ok">Continue</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  name: 'Untitled Framework',
+  type: '1d', // 1d | 2d | 9grid | 9stack | 3d | custom
+  axes: [],
+  characters: [],
+  factions: [],
+  selectedCharId: null,
+  customAxisCount: 2,
+  stackLayers: ['Low', 'Neutral', 'High'], // for 9stack: labels for each layer of the stack axis
+  gridSize: 3, // for 9grid: N×N (3=classic 9-grid, up to 6×6)
+};
+
+const FACTION_COLORS = ['#e8dcc4', '#8b1a1a', '#b8893a', '#4a5c3a', '#2a3a5c', '#6b2e8c', '#c8551b', '#2e7a6b'];
+const STORAGE_KEY = 'morality_forge_saves';
+
+// ============================================================
+// PRESETS — quick-start frameworks
+// ============================================================
+const PRESETS = {
+  'dnd-9grid': {
+    name: 'D&D Alignment',
+    type: '9grid',
+    axes: [
+      { name: 'Ethics', negLabel: 'Chaotic', posLabel: 'Lawful' },
+      { name: 'Morals', negLabel: 'Evil', posLabel: 'Good' }
+    ]
+  },
+  'simple-linear': {
+    name: 'Good ↔ Evil',
+    type: '1d',
+    axes: [{ name: 'Morality', negLabel: 'Evil', posLabel: 'Good' }]
+  },
+  // VIGILANTE FRAMEWORKS — for characters who operate outside the law.
+  // Classic D&D alignment struggles here because "Lawful Good" breaks down:
+  // is a vigilante lawful because they follow a code, or chaotic because they
+  // defy legal systems? These frameworks untangle that.
+  'vigilante-ends-means': {
+    name: 'Ends vs. Means',
+    type: '2d',
+    axes: [
+      { name: 'Means', negLabel: 'Ruthless', posLabel: 'Restrained' },
+      { name: 'Ends', negLabel: 'Selfish', posLabel: 'Righteous' }
+    ]
+  },
+  'vigilante-9grid': {
+    name: 'Vigilante 9-Grid',
+    type: '9grid',
+    axes: [
+      { name: 'Methods', negLabel: 'Brutal', posLabel: 'Merciful' },
+      { name: 'Motives', negLabel: 'Personal', posLabel: 'Communal' }
+    ]
+  },
+  'vigilante-triangle': {
+    name: 'Justice Triangle',
+    type: '3d',
+    axes: [
+      { name: 'Law', negLabel: '', posLabel: 'Law' },
+      { name: 'Revenge', negLabel: '', posLabel: 'Revenge' },
+      { name: 'Mercy', negLabel: '', posLabel: 'Mercy' }
+    ]
+  },
+  'vigilante-radar': {
+    name: 'Vigilante Traits',
+    type: 'custom',
+    axes: [
+      { name: 'Discipline', negLabel: 'Low', posLabel: 'High' },
+      { name: 'Violence', negLabel: 'Low', posLabel: 'High' },
+      { name: 'Public Trust', negLabel: 'Low', posLabel: 'High' },
+      { name: 'Moral Code', negLabel: 'Weak', posLabel: 'Strong' },
+      { name: 'Symbolism', negLabel: 'Low', posLabel: 'High' }
+    ]
+  },
+  'vigilante-stacked': {
+    name: 'Factional Alignment',
+    type: '9stack',
+    axes: [
+      { name: 'Ethics', negLabel: 'Chaotic', posLabel: 'Lawful' },
+      { name: 'Morals', negLabel: 'Evil', posLabel: 'Good' },
+      { name: 'Allegiance', negLabel: 'Outsider', posLabel: 'Insider' }
+    ],
+    stackLayers: ['Outsider', 'Neutral', 'Insider']
+  },
+  'loyalty-linear': {
+    name: 'Loyalty',
+    type: '1d',
+    axes: [{ name: 'Allegiance', negLabel: 'Traitor', posLabel: 'Devoted' }]
+  },
+  'political-compass': {
+    name: 'Political Compass',
+    type: '2d',
+    axes: [
+      { name: 'Economic', negLabel: 'Left', posLabel: 'Right' },
+      { name: 'Authority', negLabel: 'Libertarian', posLabel: 'Authoritarian' }
+    ]
+  }
+};
+
+function applyPreset(presetKey) {
+  const preset = PRESETS[presetKey];
+  if (!preset) return;
+  // Preserve characters and factions; only change geometry + axes + name.
+  const oldChars = state.characters.map(c => ({ ...c }));
+  const oldFactions = state.factions.slice();
+  state.type = preset.type;
+  state.axes = preset.axes.map(a => ({ ...a }));
+  state.name = preset.name;
+  state.customAxisCount = preset.axes.length;
+  if (preset.stackLayers) {
+    state.stackLayers = preset.stackLayers.slice();
+  } else if (preset.type === '9stack') {
+    state.stackLayers = ['Low', 'Neutral', 'High'];
+  }
+  // Reset character positions since axes changed meaning
+  state.characters = oldChars.map(c => {
+    let newPos;
+    if (preset.type === '3d') newPos = [1/3, 1/3, 1/3];
+    else if (preset.type === 'custom') newPos = preset.axes.map(() => 0.5);
+    else if (preset.type === '9stack') newPos = [0, 0, 0];
+    else newPos = preset.axes.map(() => 0);
+    return { ...c, pos: newPos };
+  });
+  state.factions = oldFactions;
+  // Sync UI: name input, geometry buttons
+  document.getElementById('framework-name').value = state.name;
+  document.querySelectorAll('.type-option').forEach(el => {
+    el.classList.toggle('active', el.dataset.type === preset.type);
+  });
+  renderAll();
+  toast('✓ Preset applied');
+}
+
+// ============================================================
+// INDEXEDDB PORTRAIT STORE
+// ============================================================
+// Portraits are stored in IndexedDB to bypass localStorage's ~5-10MB cap.
+// Each portrait record: { id, source, thumbnail, crop }
+// The character object holds just a pointer (portraitId) — the heavy image
+// data lives in IDB, so framework save/load stays lightweight.
+
+const IDB_NAME = 'alignments_db';
+const IDB_VERSION = 1;
+const IDB_STORE = 'portraits';
+let _idbPromise = null;
+
+function openDB() {
+  if (_idbPromise) return _idbPromise;
+  _idbPromise = new Promise((resolve, reject) => {
+    if (!window.indexedDB) {
+      reject(new Error('IndexedDB not supported'));
+      return;
+    }
+    const req = window.indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = (e) => resolve(e.target.result);
+    req.onerror = (e) => reject(e.target.error);
+  });
+  return _idbPromise;
+}
+
+async function idbPutPortrait(record) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(record);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function idbGetPortrait(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbDeletePortrait(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function idbListPortraitIds() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).getAllKeys();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
+function init() {
+  resetToDefault('1d');
+  renderAll();
+  setupEventListeners();
+}
+
+function resetToDefault(type) {
+  state.type = type;
+  state.characters = [];
+  state.selectedCharId = null;
+
+  if (type === '1d') {
+    state.axes = [
+      { name: 'Moral Axis', negLabel: 'Corrupt', posLabel: 'Virtuous' }
+    ];
+  } else if (type === '2d') {
+    state.axes = [
+      { name: 'X Axis', negLabel: 'Left', posLabel: 'Right' },
+      { name: 'Y Axis', negLabel: 'Down', posLabel: 'Up' }
+    ];
+  } else if (type === '9grid') {
+    state.axes = [
+      { name: 'Ethics', negLabel: 'Chaotic', posLabel: 'Lawful' },
+      { name: 'Morals', negLabel: 'Evil', posLabel: 'Good' }
+    ];
+  } else if (type === '9stack') {
+    state.axes = [
+      { name: 'Ethics', negLabel: 'Chaotic', posLabel: 'Lawful' },
+      { name: 'Morals', negLabel: 'Evil', posLabel: 'Good' },
+      { name: 'Allegiance', negLabel: 'Rebel', posLabel: 'Loyal' }
+    ];
+    state.stackLayers = ['Rebel', 'Neutral', 'Loyal']; // 3 default layers
+  } else if (type === '3d') {
+    state.axes = [
+      { name: 'Order', negLabel: '', posLabel: 'Order' },
+      { name: 'Chaos', negLabel: '', posLabel: 'Chaos' },
+      { name: 'Balance', negLabel: '', posLabel: 'Balance' }
+    ];
+  } else if (type === 'custom') {
+    state.axes = Array.from({length: state.customAxisCount}, (_, i) => ({
+      name: `Axis ${i+1}`,
+      negLabel: 'Low',
+      posLabel: 'High'
+    }));
+  }
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+function renderAll() {
+  renderHeader();
+  renderAxesConfig();
+  renderFactions();
+  renderCharacterList();
+  renderCanvas();
+  renderDetailPanel();
+  updateFactionDropdowns();
+  updateGeometryHint();
+}
+
+function renderHeader() {
+  document.getElementById('canvas-title').textContent = state.name || 'Untitled Framework';
+  const sub = {
+    '1d': 'A single spectrum between two poles',
+    '2d': 'A cross of two opposing axes',
+    '9grid': 'A 3×3 grid of labeled alignments',
+    '9stack': `${(state.stackLayers || []).length} stacked 9-grids`,
+    '3d': 'A triangular balance of three forces',
+    'custom': `${state.axes.length} custom axes`
+  };
+  document.getElementById('canvas-subtitle').textContent = sub[state.type];
+}
+
+function updateGeometryHint() {
+  const hints = {
+    '1d': 'A single spectrum between two opposing poles.',
+    '2d': 'Two perpendicular axes forming a continuous plane.',
+    '9grid': 'Classic D&D-style nine named regions — Lawful/Neutral/Chaotic × Good/Neutral/Evil.',
+    '9stack': 'Multiple 9-grids side by side, layered by a third axis. Great for factional worlds.',
+    '3d': 'Three forces in tension, plotted on a triangular field.',
+    'custom': 'Radar-style chart with any number of axes.'
+  };
+  document.getElementById('geometry-hint').textContent = hints[state.type];
+}
+
+function renderAxesConfig() {
+  const container = document.getElementById('axes-container');
+  container.innerHTML = '';
+
+  // Grid size selector for 9-grid mode
+  if (state.type === '9grid') {
+    const sizeRow = document.createElement('div');
+    sizeRow.className = 'axis-config';
+    sizeRow.innerHTML = `
+      <div class="axis-config-header">Grid Size</div>
+      <div class="field-row">
+        <label>Cells per axis</label>
+        <select id="grid-size-select" style="width:100%;">
+          <option value="2">2×2 (4 cells)</option>
+          <option value="3">3×3 (9 cells — classic)</option>
+          <option value="4">4×4 (16 cells)</option>
+          <option value="5">5×5 (25 cells)</option>
+          <option value="6">6×6 (36 cells)</option>
+        </select>
+      </div>
+    `;
+    container.appendChild(sizeRow);
+    const sel = sizeRow.querySelector('#grid-size-select');
+    sel.value = String(state.gridSize || 3);
+    sel.addEventListener('change', (e) => {
+      state.gridSize = parseInt(e.target.value);
+      renderCanvas();
+    });
+  }
+
+  if (state.type === 'custom') {
+    const controlRow = document.createElement('div');
+    controlRow.className = 'field-row-inline';
+    controlRow.innerHTML = `
+      <button class="ghost tiny" id="btn-remove-axis">− Remove Axis</button>
+      <button class="ghost tiny" id="btn-add-axis">+ Add Axis</button>
+    `;
+    container.appendChild(controlRow);
+    controlRow.querySelector('#btn-add-axis').onclick = () => {
+      if (state.axes.length < 8) {
+        state.axes.push({ name: `Axis ${state.axes.length + 1}`, negLabel: 'Low', posLabel: 'High' });
+        state.customAxisCount = state.axes.length;
+        renderAll();
+      }
+    };
+    controlRow.querySelector('#btn-remove-axis').onclick = () => {
+      if (state.axes.length > 2) {
+        state.axes.pop();
+        state.customAxisCount = state.axes.length;
+        // Trim any character positions
+        state.characters.forEach(c => {
+          if (c.pos.length > state.axes.length) c.pos = c.pos.slice(0, state.axes.length);
+        });
+        renderAll();
+      }
+    };
+  }
+
+  state.axes.forEach((axis, i) => {
+    const div = document.createElement('div');
+    div.className = 'axis-config';
+    const showPoles = state.type !== '3d';
+    // For 9stack, the 3rd axis is categorical (a list of layer names) not a continuous pole pair.
+    const isStackLayerAxis = state.type === '9stack' && i === 2;
+
+    if (isStackLayerAxis) {
+      div.innerHTML = `
+        <div class="axis-config-header">Axis 3 — Layers</div>
+        <div class="field-row">
+          <label>Name</label>
+          <input type="text" data-axis="${i}" data-field="name" value="${escapeHtml(axis.name)}">
+        </div>
+        <label style="margin-top:0.4rem;">Layer Values</label>
+        <div id="stack-layer-list" style="display:flex;flex-direction:column;gap:0.35rem;margin-top:0.25rem;"></div>
+        <button class="ghost tiny" id="btn-add-layer-config" style="margin-top:0.5rem;">+ Add Layer</button>
+        <p class="helper-text">Layers appear as side-by-side grids. Add as many as you need.</p>
+      `;
+      container.appendChild(div);
+    } else {
+      div.innerHTML = `
+        <div class="axis-config-header">Axis ${i+1}</div>
+        <div class="field-row">
+          <label>Name</label>
+          <input type="text" data-axis="${i}" data-field="name" value="${escapeHtml(axis.name)}">
+        </div>
+        ${showPoles ? `
+        <div class="field-row-inline">
+          <div>
+            <label>− Pole</label>
+            <input type="text" data-axis="${i}" data-field="negLabel" value="${escapeHtml(axis.negLabel)}">
+          </div>
+          <div>
+            <label>+ Pole</label>
+            <input type="text" data-axis="${i}" data-field="posLabel" value="${escapeHtml(axis.posLabel)}">
+          </div>
+        </div>` : `
+        <div class="field-row">
+          <label>Label</label>
+          <input type="text" data-axis="${i}" data-field="posLabel" value="${escapeHtml(axis.posLabel)}">
+        </div>`}
+      `;
+      container.appendChild(div);
+    }
+  });
+
+  // Populate the stack layer list editor, if present
+  const stackList = document.getElementById('stack-layer-list');
+  if (stackList && state.type === '9stack') {
+    const layers = state.stackLayers || [];
+    layers.forEach((label, idx) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;gap:0.3rem;align-items:center;';
+      row.innerHTML = `
+        <input type="text" data-layer-idx="${idx}" value="${escapeHtml(label)}" style="flex:1;padding:0.35rem 0.5rem;">
+        <button class="ghost tiny danger" data-remove-layer="${idx}" title="Remove layer">✕</button>
+      `;
+      stackList.appendChild(row);
+    });
+    stackList.querySelectorAll('input').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const idx = parseInt(e.target.dataset.layerIdx);
+        state.stackLayers[idx] = e.target.value;
+        renderCanvas();
+      });
+    });
+    stackList.querySelectorAll('[data-remove-layer]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const idx = parseInt(e.target.dataset.removeLayer);
+        if (state.stackLayers.length <= 1) { toast('⚠ Need at least one layer'); return; }
+        state.stackLayers.splice(idx, 1);
+        // Move any characters that were on the removed layer (or past the new end) back to the last valid layer
+        state.characters.forEach(c => {
+          if ((c.pos[2] || 0) === idx) c.pos[2] = Math.max(0, idx - 1);
+          else if ((c.pos[2] || 0) > idx) c.pos[2] = c.pos[2] - 1;
+        });
+        renderAll();
+      });
+    });
+    const addBtn = document.getElementById('btn-add-layer-config');
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        state.stackLayers.push(`Layer ${state.stackLayers.length + 1}`);
+        renderAll();
+      });
+    }
+  }
+
+  container.querySelectorAll('input[data-axis]').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const idx = parseInt(e.target.dataset.axis);
+      const field = e.target.dataset.field;
+      state.axes[idx][field] = e.target.value;
+      renderCanvas();
+    });
+  });
+}
+
+function renderFactions() {
+  const container = document.getElementById('factions-container');
+  container.innerHTML = '';
+  if (state.factions.length === 0) {
+    container.innerHTML = '<p class="helper-text">No factions yet. Add one to color-code groups.</p>';
+    return;
+  }
+  state.factions.forEach((f, i) => {
+    const div = document.createElement('div');
+    div.className = 'faction-item';
+    div.innerHTML = `
+      <input type="color" class="color-picker-inline" value="${f.color}" data-faction="${i}">
+      <input type="text" class="faction-name-input" value="${escapeHtml(f.name)}" data-faction="${i}">
+      <button class="ghost tiny danger" data-remove-faction="${i}">✕</button>
+    `;
+    container.appendChild(div);
+  });
+
+  container.querySelectorAll('input[type="color"]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const idx = parseInt(e.target.dataset.faction);
+      state.factions[idx].color = e.target.value;
+      renderCharacterList();
+      renderCanvas();
+    });
+  });
+  container.querySelectorAll('input[type="text"]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const idx = parseInt(e.target.dataset.faction);
+      state.factions[idx].name = e.target.value;
+      updateFactionDropdowns();
+    });
+  });
+  container.querySelectorAll('[data-remove-faction]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const idx = parseInt(e.target.dataset.removeFaction);
+      const factionId = state.factions[idx].id;
+      state.characters.forEach(c => { if (c.factionId === factionId) c.factionId = null; });
+      state.factions.splice(idx, 1);
+      renderAll();
+    });
+  });
+}
+
+function updateFactionDropdowns() {
+  const dropdowns = [document.getElementById('new-char-faction'), document.getElementById('bulk-faction')];
+  const detailSelect = document.getElementById('detail-faction-select');
+  if (detailSelect) dropdowns.push(detailSelect);
+
+  dropdowns.forEach(sel => {
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— No Faction —</option>';
+    state.factions.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f.id;
+      opt.textContent = f.name;
+      sel.appendChild(opt);
+    });
+    sel.value = current;
+  });
+}
+
+function renderCharacterList() {
+  const container = document.getElementById('character-list');
+  document.getElementById('char-count').textContent = `(${state.characters.length})`;
+
+  if (state.characters.length === 0) {
+    container.innerHTML = '<p class="detail-empty">No characters yet.</p>';
+    return;
+  }
+  container.innerHTML = '';
+  state.characters.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'character-item' + (c.id === state.selectedCharId ? ' selected' : '');
+    const color = getCharColor(c);
+    const swatchStyle = c.portrait
+      ? `background-image: url('${c.portrait}'); border-color: ${color};`
+      : `background: ${color};`;
+    div.innerHTML = `
+      <span class="character-swatch" style="${swatchStyle}"></span>
+      <span class="character-name">${escapeHtml(c.name)}</span>
+      <span class="character-coords">${formatCoords(c.pos)}</span>
+      <button class="remove" data-remove="${c.id}">✕</button>
+    `;
+    div.addEventListener('click', (e) => {
+      if (e.target.dataset.remove) return;
+      state.selectedCharId = c.id;
+      renderCharacterList();
+      renderDetailPanel();
+      renderCanvas();
+    });
+    div.querySelector('.remove').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (c.portraitId) {
+        try { await idbDeletePortrait(c.portraitId); } catch (err) { console.error(err); }
+      }
+      state.characters = state.characters.filter(ch => ch.id !== c.id);
+      if (state.selectedCharId === c.id) state.selectedCharId = null;
+      renderAll();
+    });
+    container.appendChild(div);
+  });
+}
+
+function renderCanvas() {
+  const canvas = document.getElementById('canvas');
+  let typeClass = 'grid-2d';
+  if (state.type === '1d') typeClass = 'line-1d';
+  else if (state.type === '9grid') typeClass = 'grid-9grid';
+  else if (state.type === '9stack') typeClass = 'stacked-canvas';
+  else if (state.type === '3d') typeClass = 'grid-3d-canvas';
+  else if (state.type === 'custom') typeClass = 'custom-canvas';
+  canvas.className = 'framework-canvas ' + typeClass;
+  canvas.innerHTML = '';
+
+  // Create the inner field where tokens and grid live
+  const field = document.createElement('div');
+  field.className = 'field-inner';
+  field.id = 'field-inner';
+  canvas.appendChild(field);
+
+  if (state.type === '1d') renderCanvas1D(canvas, field);
+  else if (state.type === '2d') renderCanvas2D(canvas, field);
+  else if (state.type === '9grid') renderCanvas9Grid(canvas, field);
+  else if (state.type === '9stack') { renderCanvas9Stack(canvas, field); return; } // handles its own tokens
+  else if (state.type === '3d') renderCanvas3D(canvas, field);
+  else if (state.type === 'custom') renderCanvasCustom(canvas, field);
+
+  // Render tokens into the field (not the outer canvas)
+  state.characters.forEach(c => {
+    const token = createToken(c);
+    const screenPos = dataToScreen(c.pos, field);
+    token.style.left = screenPos.x + 'px';
+    token.style.top = screenPos.y + 'px';
+    field.appendChild(token);
+  });
+}
+
+function renderCanvas1D(canvas, field) {
+  const axis = state.axes[0];
+  // Grid line and ticks inside the field
+  field.insertAdjacentHTML('beforeend', `
+    <div class="axis-line horizontal" style="left:5%;right:5%;"></div>
+    <div class="axis-tick" style="width:1px;height:14px;top:calc(50% - 7px);left:5%;"></div>
+    <div class="axis-tick" style="width:1px;height:14px;top:calc(50% - 7px);left:50%;"></div>
+    <div class="axis-tick" style="width:1px;height:14px;top:calc(50% - 7px);right:5%;"></div>
+    <div class="axis-label" style="top:15%;left:5%;transform:translateX(-50%);max-width:100px;text-align:center;white-space:normal;line-height:1.15;">${escapeHtml(axis.negLabel)}</div>
+    <div class="axis-label" style="top:15%;right:5%;transform:translateX(50%);max-width:100px;text-align:center;white-space:normal;line-height:1.15;">${escapeHtml(axis.posLabel)}</div>
+  `);
+  // Axis name floats in outer padding above the field
+  canvas.insertAdjacentHTML('beforeend', `
+    <div class="axis-label italic" style="top:28px;left:50%;transform:translateX(-50%);">${escapeHtml(axis.name)}</div>
+  `);
+}
+
+function renderCanvas2D(canvas, field) {
+  const [xAxis, yAxis] = state.axes;
+  // Grid lines inside the field
+  field.insertAdjacentHTML('beforeend', `
+    <div class="axis-line horizontal" style="left:0;right:0;"></div>
+    <div class="axis-line vertical" style="top:0;bottom:0;"></div>
+  `);
+  // Grid thirds (subtle)
+  ['33.33%', '66.66%'].forEach(pct => {
+    field.insertAdjacentHTML('beforeend', `
+      <div class="axis-line" style="left:0;right:0;top:${pct};height:1px;opacity:0.15;"></div>
+      <div class="axis-line" style="top:0;bottom:0;left:${pct};width:1px;opacity:0.15;"></div>
+    `);
+  });
+  // Pole labels inside the field, tucked near the edges so they don't overlap center where tokens cluster
+  field.insertAdjacentHTML('beforeend', `
+    <div class="axis-label" style="top:50%;left:8px;transform:translateY(-50%);max-width:90px;text-align:left;white-space:normal;line-height:1.15;background:rgba(26,21,18,0.65);padding:3px 5px;">${escapeHtml(xAxis.negLabel)}</div>
+    <div class="axis-label" style="top:50%;right:8px;transform:translateY(-50%);max-width:90px;text-align:right;white-space:normal;line-height:1.15;background:rgba(26,21,18,0.65);padding:3px 5px;">${escapeHtml(xAxis.posLabel)}</div>
+    <div class="axis-label" style="top:8px;left:50%;transform:translateX(-50%);max-width:180px;text-align:center;white-space:normal;line-height:1.15;background:rgba(26,21,18,0.65);padding:3px 5px;">${escapeHtml(yAxis.posLabel)}</div>
+    <div class="axis-label" style="bottom:8px;left:50%;transform:translateX(-50%);max-width:180px;text-align:center;white-space:normal;line-height:1.15;background:rgba(26,21,18,0.65);padding:3px 5px;">${escapeHtml(yAxis.negLabel)}</div>
+  `);
+  // Axis names in outer corners
+  canvas.insertAdjacentHTML('beforeend', `
+    <div class="axis-label italic" style="top:16px;left:12px;font-size:0.7rem;opacity:0.6;">${escapeHtml(yAxis.name)}</div>
+    <div class="axis-label italic" style="bottom:16px;right:12px;font-size:0.7rem;opacity:0.6;">${escapeHtml(xAxis.name)}</div>
+  `);
+}
+
+function renderCanvas9Grid(canvas, field) {
+  const [xAxis, yAxis] = state.axes;
+  const N = state.gridSize || 3;
+
+  // Draw the N×N grid boundaries
+  for (let i = 1; i < N; i++) {
+    const pct = (i / N) * 100;
+    field.insertAdjacentHTML('beforeend', `
+      <div class="axis-line" style="left:0;right:0;top:${pct}%;height:1px;background:rgba(184,137,58,0.45);"></div>
+      <div class="axis-line" style="top:0;bottom:0;left:${pct}%;width:1px;background:rgba(184,137,58,0.45);"></div>
+    `);
+  }
+
+  // Build axis-pole labels across N cells.
+  // For N=3: [neg, neutral, pos].
+  // For N=4: [neg, slightly-neg, slightly-pos, pos] — we compose with "Mildly" / "Strongly" prefixes.
+  // For N=5: [strong-neg, mild-neg, neutral, mild-pos, strong-pos].
+  // For N>=6: uses generic indexed tiers ("Neg I", "Neg II", etc. fallback — or simply the pole labels at edges and blanks in between, but for readability we'll compose).
+  function labelsForAxis(axis, reverse = false) {
+    const neg = axis.negLabel || 'Low';
+    const pos = axis.posLabel || 'High';
+    let arr;
+    if (N === 2) arr = [neg, pos];
+    else if (N === 3) arr = [neg, 'Neutral', pos];
+    else if (N === 4) arr = [neg, `Mildly ${neg}`, `Mildly ${pos}`, pos];
+    else if (N === 5) arr = [neg, `Mildly ${neg}`, 'Neutral', `Mildly ${pos}`, pos];
+    else if (N === 6) arr = [neg, `Strongly ${neg}`, `Mildly ${neg}`, `Mildly ${pos}`, `Strongly ${pos}`, pos];
+    else arr = Array.from({length: N}, (_, i) => i === 0 ? neg : i === N-1 ? pos : `Tier ${i}`);
+    return reverse ? arr.slice().reverse() : arr;
+  }
+
+  const xLabels = labelsForAxis(xAxis, false);          // left → right = neg → pos
+  const yLabels = labelsForAxis(yAxis, true);           // top → bottom = pos → neg
+
+  // Draw cell labels
+  for (let row = 0; row < N; row++) {
+    for (let col = 0; col < N; col++) {
+      // Compose cell label — prefer shorter forms when both are "Neutral"
+      let cellLabel;
+      const xl = xLabels[col];
+      const yl = yLabels[row];
+      if (xl === 'Neutral' && yl === 'Neutral') {
+        cellLabel = 'True Neutral';
+      } else if (xl === 'Neutral') {
+        cellLabel = `Neutral ${yl}`;
+      } else if (yl === 'Neutral') {
+        cellLabel = `${xl} Neutral`;
+      } else {
+        cellLabel = `${xl} ${yl}`;
+      }
+
+      const cellPctW = 100 / N;
+      const left = (col / N) * 100;
+      const top = (row / N) * 100;
+      // Scale font size down a bit when grid is dense
+      const fontSize = N <= 3 ? '0.72rem' : N === 4 ? '0.62rem' : N === 5 ? '0.55rem' : '0.5rem';
+      field.insertAdjacentHTML('beforeend', `
+        <div class="grid-cell-label" style="position:absolute;top:${top}%;left:${left}%;width:${cellPctW}%;height:${cellPctW}%;display:flex;align-items:flex-start;justify-content:center;pointer-events:none;padding-top:6px;">
+          <span style="font-family:'Cinzel',serif;font-size:${fontSize};letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);opacity:0.7;text-align:center;line-height:1.1;max-width:92%;">
+            ${escapeHtml(cellLabel)}
+          </span>
+        </div>
+      `);
+    }
+  }
+
+  // Axis names in outer corners
+  canvas.insertAdjacentHTML('beforeend', `
+    <div class="axis-label italic" style="top:16px;left:12px;font-size:0.7rem;opacity:0.6;">${escapeHtml(yAxis.name)}</div>
+    <div class="axis-label italic" style="bottom:16px;right:12px;font-size:0.7rem;opacity:0.6;">${escapeHtml(xAxis.name)}</div>
+  `);
+}
+
+function renderCanvas9Stack(canvas, field) {
+  const [xAxis, yAxis, zAxis] = state.axes;
+  const layers = state.stackLayers || [];
+
+  // Axis name annotations in outer padding
+  canvas.insertAdjacentHTML('beforeend', `
+    <div class="axis-label italic" style="top:10px;left:12px;font-size:0.7rem;opacity:0.6;">${escapeHtml(yAxis.name)} × ${escapeHtml(xAxis.name)}</div>
+    <div class="axis-label italic" style="top:10px;right:12px;font-size:0.7rem;opacity:0.6;">layered by ${escapeHtml(zAxis ? zAxis.name : '')}</div>
+  `);
+
+  // Build one grid per layer
+  layers.forEach((layerLabel, layerIdx) => {
+    const layerDiv = document.createElement('div');
+    layerDiv.className = 'stack-layer';
+    layerDiv.dataset.layerIdx = layerIdx;
+
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'stack-layer-label';
+    labelDiv.contentEditable = 'true';
+    labelDiv.spellcheck = false;
+    labelDiv.textContent = layerLabel;
+    labelDiv.addEventListener('blur', () => {
+      const newVal = labelDiv.textContent.trim() || `Layer ${layerIdx + 1}`;
+      state.stackLayers[layerIdx] = newVal;
+    });
+    labelDiv.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); labelDiv.blur(); }
+    });
+    layerDiv.appendChild(labelDiv);
+
+    const grid = document.createElement('div');
+    grid.className = 'stack-layer-grid';
+    grid.dataset.layerIdx = layerIdx;
+    grid.id = `stack-grid-${layerIdx}`;
+    // Draw grid thirds
+    ['33.333%', '66.666%'].forEach(pct => {
+      grid.insertAdjacentHTML('beforeend', `
+        <div class="axis-line" style="left:0;right:0;top:${pct};height:1px;background:rgba(184,137,58,0.45);"></div>
+        <div class="axis-line" style="top:0;bottom:0;left:${pct};width:1px;background:rgba(184,137,58,0.45);"></div>
+      `);
+    });
+    // Pole labels inside each grid (compact — only show top grid fully to reduce clutter)
+    grid.insertAdjacentHTML('beforeend', `
+      <div class="axis-label" style="top:4px;left:50%;transform:translateX(-50%);font-size:0.6rem;opacity:0.65;background:rgba(26,21,18,0.7);padding:1px 4px;">${escapeHtml(yAxis.posLabel)}</div>
+      <div class="axis-label" style="bottom:4px;left:50%;transform:translateX(-50%);font-size:0.6rem;opacity:0.65;background:rgba(26,21,18,0.7);padding:1px 4px;">${escapeHtml(yAxis.negLabel)}</div>
+      <div class="axis-label" style="top:50%;left:4px;transform:translateY(-50%);font-size:0.6rem;opacity:0.65;background:rgba(26,21,18,0.7);padding:1px 4px;">${escapeHtml(xAxis.negLabel)}</div>
+      <div class="axis-label" style="top:50%;right:4px;transform:translateY(-50%);font-size:0.6rem;opacity:0.65;background:rgba(26,21,18,0.7);padding:1px 4px;">${escapeHtml(xAxis.posLabel)}</div>
+    `);
+    layerDiv.appendChild(grid);
+    field.appendChild(layerDiv);
+  });
+
+  // Add / remove layer controls
+  const controls = document.createElement('div');
+  controls.className = 'stack-controls';
+  controls.innerHTML = `
+    <button class="ghost tiny" id="btn-remove-layer">− Layer</button>
+    <button class="ghost tiny" id="btn-add-layer">+ Layer</button>
+  `;
+  canvas.appendChild(controls);
+  controls.style.cssText = 'position:absolute;bottom:8px;left:50%;transform:translateX(-50%);';
+  controls.querySelector('#btn-add-layer').onclick = () => {
+    state.stackLayers = [...(state.stackLayers || []), `Layer ${state.stackLayers.length + 1}`];
+    renderCanvas();
+  };
+  controls.querySelector('#btn-remove-layer').onclick = () => {
+    if (state.stackLayers.length <= 1) { toast('⚠ Need at least one layer'); return; }
+    const removedIdx = state.stackLayers.length - 1;
+    state.stackLayers = state.stackLayers.slice(0, -1);
+    // Clamp any characters on the removed layer back to the last remaining layer
+    state.characters.forEach(c => {
+      if ((c.pos[2] || 0) >= state.stackLayers.length) {
+        c.pos[2] = state.stackLayers.length - 1;
+      }
+    });
+    renderCanvas();
+  };
+
+  // Render tokens into their layer grids
+  state.characters.forEach(c => {
+    // For 9stack, pos = [x, y, layerIdx]
+    const layerIdx = Math.max(0, Math.min(state.stackLayers.length - 1, Math.round(c.pos[2] || 0)));
+    const gridEl = document.getElementById(`stack-grid-${layerIdx}`);
+    if (!gridEl) return;
+    const token = createToken(c);
+    const rect = gridEl.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const x = (c.pos[0] + 1) / 2 * (W * 0.94) + W * 0.03;
+    const y = (1 - (c.pos[1] + 1) / 2) * (H * 0.94) + H * 0.03;
+    token.style.left = x + 'px';
+    token.style.top = y + 'px';
+    gridEl.appendChild(token);
+  });
+}
+
+function renderCanvas3D(canvas, field) {
+  // Triangle vertices in percentage coordinates (within the field)
+  const v = {
+    a: { x: 50, y: 8 },   // top
+    b: { x: 8, y: 88 },   // bottom-left
+    c: { x: 92, y: 88 }   // bottom-right
+  };
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;';
+  svg.innerHTML = `
+    <polygon points="${v.a.x},${v.a.y} ${v.b.x},${v.b.y} ${v.c.x},${v.c.y}"
+      fill="none" stroke="rgba(184,137,58,0.4)" stroke-width="0.2"/>
+    <line x1="${v.a.x}" y1="${v.a.y}" x2="${(v.b.x+v.c.x)/2}" y2="${(v.b.y+v.c.y)/2}" stroke="rgba(184,137,58,0.15)" stroke-width="0.15"/>
+    <line x1="${v.b.x}" y1="${v.b.y}" x2="${(v.a.x+v.c.x)/2}" y2="${(v.a.y+v.c.y)/2}" stroke="rgba(184,137,58,0.15)" stroke-width="0.15"/>
+    <line x1="${v.c.x}" y1="${v.c.y}" x2="${(v.a.x+v.b.x)/2}" y2="${(v.a.y+v.b.y)/2}" stroke="rgba(184,137,58,0.15)" stroke-width="0.15"/>
+    <circle cx="${(v.a.x+v.b.x+v.c.x)/3}" cy="${(v.a.y+v.b.y+v.c.y)/3}" r="0.8" fill="rgba(184,137,58,0.4)"/>
+  `;
+  field.appendChild(svg);
+
+  // Labels in outer padding
+  canvas.insertAdjacentHTML('beforeend', `
+    <div class="axis-label" style="top:18px;left:50%;transform:translateX(-50%);">${escapeHtml(state.axes[0].posLabel)}</div>
+    <div class="axis-label" style="bottom:18px;left:8px;text-align:left;">${escapeHtml(state.axes[1].posLabel)}</div>
+    <div class="axis-label" style="bottom:18px;right:8px;text-align:right;">${escapeHtml(state.axes[2].posLabel)}</div>
+  `);
+}
+
+function renderCanvasCustom(canvas, field) {
+  // Radar chart style — grid in field, labels in outer padding
+  const n = state.axes.length;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;';
+
+  const cx = 50, cy = 50, r = 42;
+  let lines = '';
+  [0.33, 0.66, 1].forEach(scale => {
+    let pts = [];
+    for (let i = 0; i < n; i++) {
+      const angle = (Math.PI * 2 * i / n) - Math.PI/2;
+      const x = cx + Math.cos(angle) * r * scale;
+      const y = cy + Math.sin(angle) * r * scale;
+      pts.push(`${x},${y}`);
+    }
+    lines += `<polygon points="${pts.join(' ')}" fill="none" stroke="rgba(184,137,58,${scale === 1 ? 0.4 : 0.15})" stroke-width="0.2"/>`;
+  });
+  for (let i = 0; i < n; i++) {
+    const angle = (Math.PI * 2 * i / n) - Math.PI/2;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    lines += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="rgba(184,137,58,0.25)" stroke-width="0.15"/>`;
+  }
+  svg.innerHTML = lines;
+  field.appendChild(svg);
+
+  // Axis labels positioned around the OUTSIDE of the field, in the outer canvas padding
+  // The field-inner sits inside canvas with padding; labels go in that padding area
+  for (let i = 0; i < n; i++) {
+    const angle = (Math.PI * 2 * i / n) - Math.PI/2;
+    const label = document.createElement('div');
+    label.className = 'axis-label';
+    // Use canvas center (which is roughly field center since padding is symmetric)
+    // and place label beyond the field edge
+    const distPct = 52; // beyond the 42% radius, into the padding
+    const lx = 50 + Math.cos(angle) * distPct;
+    const ly = 50 + Math.sin(angle) * distPct;
+    label.style.cssText = `position:absolute;top:${ly}%;left:${lx}%;transform:translate(-50%,-50%);max-width:110px;text-align:center;white-space:normal;line-height:1.15;z-index:5;`;
+    label.textContent = state.axes[i].name;
+    canvas.appendChild(label);
+  }
+}
+
+function createToken(c) {
+  const token = document.createElement('div');
+  const hasPortrait = !!c.portrait;
+  token.className = 'token' + (c.id === state.selectedCharId ? ' selected' : '') + (hasPortrait ? ' has-portrait' : '');
+  token.dataset.charId = c.id;
+  token.dataset.name = c.name;
+  token.title = c.name;
+
+  if (hasPortrait) {
+    token.style.backgroundImage = `url('${c.portrait}')`;
+    // faction border color
+    const color = getCharColor(c);
+    if (c.factionId) {
+      token.style.boxShadow = `0 2px 10px rgba(0,0,0,0.7), 0 0 0 2px ${color}`;
+    }
+    token.textContent = c.name; // indented off-screen via CSS, but useful for accessibility
+  } else {
+    const color = getCharColor(c);
+    token.style.background = color;
+    token.style.color = getContrastColor(color);
+    token.textContent = c.name || '?';
+  }
+
+  makeTokenDraggable(token, c);
+  token.addEventListener('click', (e) => {
+    e.stopPropagation();
+    state.selectedCharId = c.id;
+    renderCharacterList();
+    renderDetailPanel();
+    renderCanvas();
+  });
+  return token;
+}
+
+function renderDetailPanel() {
+  const panel = document.getElementById('detail-panel');
+  const c = state.characters.find(ch => ch.id === state.selectedCharId);
+  if (!c) {
+    panel.innerHTML = '<p class="detail-empty">Select a character to edit their position, notes, and faction.</p>';
+    return;
+  }
+
+  let coordControls = '';
+  if (state.type === '1d') {
+    coordControls = coordSlider('X', c.pos[0], 0, state.axes[0].negLabel, state.axes[0].posLabel);
+  } else if (state.type === '2d' || state.type === '9grid') {
+    coordControls =
+      coordSlider('X', c.pos[0], 0, state.axes[0].negLabel, state.axes[0].posLabel) +
+      coordSlider('Y', c.pos[1], 1, state.axes[1].negLabel, state.axes[1].posLabel);
+  } else if (state.type === '9stack') {
+    const layerIdx = Math.round(c.pos[2] || 0);
+    const layerOptions = (state.stackLayers || []).map((label, i) =>
+      `<option value="${i}" ${i === layerIdx ? 'selected' : ''}>${escapeHtml(label)}</option>`
+    ).join('');
+    coordControls =
+      coordSlider('X', c.pos[0], 0, state.axes[0].negLabel, state.axes[0].posLabel) +
+      coordSlider('Y', c.pos[1], 1, state.axes[1].negLabel, state.axes[1].posLabel) +
+      `<div class="coord-slider-row">
+        <label><span>${escapeHtml(state.axes[2] ? state.axes[2].name : 'Layer')}</span></label>
+        <select id="detail-stack-layer" style="width:100%;">${layerOptions}</select>
+      </div>`;
+  } else if (state.type === '3d') {
+    coordControls = state.axes.map((ax, i) =>
+      coordSlider(ax.posLabel || `Axis ${i+1}`, c.pos[i], i, '0', '1', true)
+    ).join('');
+  } else {
+    coordControls = state.axes.map((ax, i) =>
+      coordSlider(ax.name, c.pos[i], i, '0', '1', true)
+    ).join('');
+  }
+
+  const portraitStyle = c.portrait
+    ? `background-image: url('${c.portrait}');`
+    : '';
+  const portraitHasImage = c.portrait ? 'has-image' : '';
+
+  panel.innerHTML = `
+    <div class="portrait-uploader">
+      <div class="portrait-preview ${portraitHasImage}" id="portrait-preview" style="${portraitStyle}">
+        ${c.portrait ? '' : 'Add<br>Portrait'}
+      </div>
+      <div class="portrait-controls">
+        <input type="file" id="portrait-file" accept="image/*" style="display:none;">
+        <button class="ghost tiny" id="btn-upload-portrait">Upload</button>
+        ${c.portrait ? '<button class="ghost tiny" id="btn-adjust-portrait">Adjust</button>' : ''}
+        ${c.portrait ? '<button class="ghost tiny danger" id="btn-remove-portrait">✕ Remove</button>' : ''}
+      </div>
+    </div>
+    <div class="field-row">
+      <label>Name</label>
+      <input type="text" id="detail-name" value="${escapeHtml(c.name)}">
+    </div>
+    <div class="field-row">
+      <label>Faction</label>
+      <select id="detail-faction-select">
+        <option value="">— No Faction —</option>
+      </select>
+    </div>
+    <div class="coords-display">${formatCoords(c.pos)}</div>
+    ${coordControls}
+    <div class="field-row" style="margin-top: 0.75rem;">
+      <label>Notes</label>
+      <textarea id="detail-notes" placeholder="Motivations, secrets, quirks...">${escapeHtml(c.notes || '')}</textarea>
+    </div>
+    <button class="ghost danger tiny" id="detail-delete" style="margin-top: 0.5rem;">✕ Remove Character</button>
+  `;
+
+  updateFactionDropdowns();
+  const factionSel = document.getElementById('detail-faction-select');
+  factionSel.value = c.factionId || '';
+
+  // Portrait handlers
+  const fileInput = document.getElementById('portrait-file');
+  const preview = document.getElementById('portrait-preview');
+  const uploadBtn = document.getElementById('btn-upload-portrait');
+  const openFileDialog = () => fileInput.click();
+  uploadBtn.addEventListener('click', openFileDialog);
+  preview.addEventListener('click', openFileDialog);
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast('⚠ Not an image file');
+      return;
+    }
+    resizeImageToDataURL(file).then(async (sourceDataUrl) => {
+      c.portraitSource = sourceDataUrl;
+      c.portraitCrop = { cx: 0.5, cy: 0.5, zoom: 1 };
+      const thumb = await renderCroppedPortrait(sourceDataUrl, c.portraitCrop);
+      c.portrait = thumb;
+      // Assign a portrait ID if missing, and persist to IndexedDB
+      if (!c.portraitId) c.portraitId = 'p_' + uid();
+      try {
+        await idbPutPortrait({
+          id: c.portraitId,
+          source: sourceDataUrl,
+          thumbnail: thumb,
+          crop: c.portraitCrop
+        });
+      } catch (err) {
+        console.error('IDB save failed:', err);
+        toast('⚠ Portrait save failed');
+      }
+      renderCharacterList();
+      renderCanvas();
+      renderDetailPanel();
+      // Auto-open the crop editor so they can adjust
+      openCropEditor(c);
+    }).catch(err => {
+      console.error(err);
+      toast('⚠ Upload failed');
+    });
+  });
+  const removeBtn = document.getElementById('btn-remove-portrait');
+  if (removeBtn) {
+    removeBtn.addEventListener('click', async () => {
+      if (c.portraitId) {
+        try { await idbDeletePortrait(c.portraitId); } catch (e) { console.error(e); }
+      }
+      c.portrait = null;
+      c.portraitSource = null;
+      c.portraitCrop = null;
+      c.portraitId = null;
+      renderCharacterList();
+      renderCanvas();
+      renderDetailPanel();
+    });
+  }
+  const adjustBtn = document.getElementById('btn-adjust-portrait');
+  if (adjustBtn) {
+    adjustBtn.addEventListener('click', () => openCropEditor(c));
+  }
+
+  document.getElementById('detail-name').addEventListener('input', e => {
+    c.name = e.target.value;
+    renderCharacterList();
+    renderCanvas();
+    document.getElementById('canvas-title').textContent = state.name;
+  });
+  factionSel.addEventListener('change', e => {
+    c.factionId = e.target.value || null;
+    renderCharacterList();
+    renderCanvas();
+  });
+  document.getElementById('detail-notes').addEventListener('input', e => {
+    c.notes = e.target.value;
+  });
+  document.getElementById('detail-delete').addEventListener('click', async () => {
+    if (c.portraitId) {
+      try { await idbDeletePortrait(c.portraitId); } catch (err) { console.error(err); }
+    }
+    state.characters = state.characters.filter(ch => ch.id !== c.id);
+    state.selectedCharId = null;
+    renderAll();
+  });
+
+  panel.querySelectorAll('input[type="range"]').forEach(s => {
+    s.addEventListener('input', e => {
+      const i = parseInt(e.target.dataset.coord);
+      c.pos[i] = parseFloat(e.target.value);
+      renderCanvas();
+      // Update coord display
+      const disp = panel.querySelector('.coords-display');
+      if (disp) disp.textContent = formatCoords(c.pos);
+    });
+  });
+
+  const layerSelect = document.getElementById('detail-stack-layer');
+  if (layerSelect) {
+    layerSelect.addEventListener('change', e => {
+      c.pos[2] = parseInt(e.target.value);
+      renderCanvas();
+      const disp = panel.querySelector('.coords-display');
+      if (disp) disp.textContent = formatCoords(c.pos);
+    });
+  }
+}
+
+function coordSlider(name, value, index, negLabel, posLabel, zeroToOne = false) {
+  const min = zeroToOne ? 0 : -1;
+  const max = 1;
+  return `
+    <div class="coord-slider-row">
+      <label><span>${escapeHtml(name)}</span><span style="opacity:0.6;">${value.toFixed(2)}</span></label>
+      <input type="range" min="${min}" max="${max}" step="0.01" value="${value}" data-coord="${index}">
+      <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--bone);opacity:0.5;margin-top:0.15rem;">
+        <span>${escapeHtml(negLabel)}</span>
+        <span>${escapeHtml(posLabel)}</span>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// COORDINATE CONVERSION
+// Canonical: pos is an array; for 1d/2d ranges [-1,1], for 3d barycentric [0,1] summing to 1, for custom [0,1] each axis
+// ============================================================
+function dataToScreen(pos, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const W = rect.width, H = rect.height;
+
+  if (state.type === '1d') {
+    // Use small inset to keep tokens from clipping at the very edge
+    const x = (pos[0] + 1) / 2 * (W * 0.90) + W * 0.05;
+    const y = H / 2;
+    return { x, y };
+  }
+  if (state.type === '2d' || state.type === '9grid') {
+    const x = (pos[0] + 1) / 2 * (W * 0.94) + W * 0.03;
+    const y = (1 - (pos[1] + 1) / 2) * (H * 0.94) + H * 0.03;
+    return { x, y };
+  }
+  if (state.type === '3d') {
+    // Barycentric to cartesian. Triangle vertices match the SVG:
+    const v = [
+      { x: 0.5, y: 0.08 }, { x: 0.08, y: 0.88 }, { x: 0.92, y: 0.88 }
+    ];
+    const sum = (pos[0] + pos[1] + pos[2]) || 1;
+    const a = pos[0]/sum, b = pos[1]/sum, c = pos[2]/sum;
+    return {
+      x: (a*v[0].x + b*v[1].x + c*v[2].x) * W,
+      y: (a*v[0].y + b*v[1].y + c*v[2].y) * H
+    };
+  }
+  if (state.type === 'custom') {
+    // Radar: average the vector contributions
+    const n = state.axes.length;
+    const cx = W/2, cy = H/2, r = W * 0.42;
+    let sx = 0, sy = 0;
+    for (let i = 0; i < n; i++) {
+      const angle = (Math.PI * 2 * i / n) - Math.PI/2;
+      sx += Math.cos(angle) * r * pos[i];
+      sy += Math.sin(angle) * r * pos[i];
+    }
+    return { x: cx + sx/n * n/2, y: cy + sy/n * n/2 };
+    // Note: this is a centroid-style placement, intuitive for radar
+  }
+  return { x: canvas.offsetWidth/2, y: canvas.offsetHeight/2 };
+}
+
+function screenToData(x, y, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const W = rect.width, H = rect.height;
+
+  if (state.type === '1d') {
+    const nx = ((x - W * 0.05) / (W * 0.90)) * 2 - 1;
+    return [clamp(nx, -1, 1)];
+  }
+  if (state.type === '2d' || state.type === '9grid') {
+    const nx = ((x - W * 0.03) / (W * 0.94)) * 2 - 1;
+    const ny = (1 - (y - H * 0.03) / (H * 0.94)) * 2 - 1;
+    return [clamp(nx, -1, 1), clamp(ny, -1, 1)];
+  }
+  if (state.type === '3d') {
+    // Inverse barycentric — vertices match new triangle
+    const v = [
+      { x: 0.5*W, y: 0.08*H }, { x: 0.08*W, y: 0.88*H }, { x: 0.92*W, y: 0.88*H }
+    ];
+    const denom = (v[1].y - v[2].y)*(v[0].x - v[2].x) + (v[2].x - v[1].x)*(v[0].y - v[2].y);
+    let a = ((v[1].y - v[2].y)*(x - v[2].x) + (v[2].x - v[1].x)*(y - v[2].y)) / denom;
+    let b = ((v[2].y - v[0].y)*(x - v[2].x) + (v[0].x - v[2].x)*(y - v[2].y)) / denom;
+    let c = 1 - a - b;
+    a = clamp(a, 0, 1); b = clamp(b, 0, 1); c = clamp(c, 0, 1);
+    const s = a+b+c;
+    return [a/s, b/s, c/s];
+  }
+  if (state.type === 'custom') {
+    // For custom, just keep what's there; slider-based edit is primary
+    const c = state.characters.find(ch => ch.id === state.selectedCharId);
+    return c ? c.pos.slice() : state.axes.map(() => 0.5);
+  }
+  return [0];
+}
+
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+// ============================================================
+// DRAGGING
+// ============================================================
+function makeTokenDraggable(token, c) {
+  let dragging = false, startedDrag = false;
+  let startX, startY;
+
+  const onMouseDown = (e) => {
+    e.preventDefault();
+    dragging = true;
+    startedDrag = false;
+    startX = e.clientX || (e.touches && e.touches[0].clientX);
+    startY = e.clientY || (e.touches && e.touches[0].clientY);
+    token.classList.add('dragging');
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('touchmove', onMouseMove, { passive: false });
+    document.addEventListener('touchend', onMouseUp);
+  };
+
+  const onMouseMove = (e) => {
+    if (!dragging) return;
+    e.preventDefault();
+    const cx = e.clientX || (e.touches && e.touches[0].clientX);
+    const cy = e.clientY || (e.touches && e.touches[0].clientY);
+    if (!startedDrag && (Math.abs(cx - startX) > 3 || Math.abs(cy - startY) > 3)) {
+      startedDrag = true;
+    }
+    if (!startedDrag) return;
+
+    // Special-case 9stack: find which layer grid the pointer is over,
+    // and update token position within that grid. Cross-layer drag supported.
+    if (state.type === '9stack') {
+      // Find hovered layer grid by elementFromPoint
+      const target = document.elementFromPoint(cx, cy);
+      let gridEl = target && target.closest('.stack-layer-grid');
+      // If pointer is between grids, fall back to nearest by horizontal center
+      if (!gridEl) {
+        let best = null, bestDist = Infinity;
+        document.querySelectorAll('.stack-layer-grid').forEach(g => {
+          const r = g.getBoundingClientRect();
+          const gx = r.left + r.width / 2;
+          const d = Math.abs(cx - gx);
+          if (d < bestDist) { bestDist = d; best = g; }
+        });
+        gridEl = best;
+      }
+      if (!gridEl) return;
+      const layerIdx = parseInt(gridEl.dataset.layerIdx);
+      const rect = gridEl.getBoundingClientRect();
+      const W = rect.width, H = rect.height;
+      const rx = cx - rect.left;
+      const ry = cy - rect.top;
+      // Clamp within the grid and convert to [-1,1] coords
+      const nx = Math.max(-1, Math.min(1, ((rx - W * 0.03) / (W * 0.94)) * 2 - 1));
+      const ny = Math.max(-1, Math.min(1, (1 - (ry - H * 0.03) / (H * 0.94)) * 2 - 1));
+      c.pos = [nx, ny, layerIdx];
+
+      // Move token into the correct grid if it changed
+      if (token.parentElement !== gridEl) {
+        gridEl.appendChild(token);
+      }
+      const screenX = (nx + 1) / 2 * (W * 0.94) + W * 0.03;
+      const screenY = (1 - (ny + 1) / 2) * (H * 0.94) + H * 0.03;
+      token.style.left = screenX + 'px';
+      token.style.top = screenY + 'px';
+      return;
+    }
+
+    const field = document.getElementById('field-inner');
+    const rect = field.getBoundingClientRect();
+    const x = cx - rect.left;
+    const y = cy - rect.top;
+    c.pos = screenToData(x, y, field);
+
+    // Direct DOM update for smooth drag
+    const screenPos = dataToScreen(c.pos, field);
+    token.style.left = screenPos.x + 'px';
+    token.style.top = screenPos.y + 'px';
+  };
+
+  const onMouseUp = () => {
+    dragging = false;
+    token.classList.remove('dragging');
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+    document.removeEventListener('touchmove', onMouseMove);
+    document.removeEventListener('touchend', onMouseUp);
+    if (startedDrag) {
+      renderCharacterList();
+      renderDetailPanel();
+    }
+  };
+
+  token.addEventListener('mousedown', onMouseDown);
+  token.addEventListener('touchstart', onMouseDown, { passive: false });
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+function getCharColor(c) {
+  if (c.factionId) {
+    const f = state.factions.find(fa => fa.id === c.factionId);
+    if (f) return f.color;
+  }
+  return '#e8dcc4';
+}
+
+function getContrastColor(hex) {
+  const h = hex.replace('#','');
+  const r = parseInt(h.substring(0,2), 16);
+  const g = parseInt(h.substring(2,4), 16);
+  const b = parseInt(h.substring(4,6), 16);
+  const lum = (0.299*r + 0.587*g + 0.114*b);
+  return lum > 140 ? '#1a1512' : '#f2e8d0';
+}
+
+function formatCoords(pos) {
+  return '[' + pos.map(p => p.toFixed(2)).join(', ') + ']';
+}
+
+function uid() { return Math.random().toString(36).slice(2, 10); }
+
+function resizeImageToDataURL(file, maxDim = 200) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        // Store the full image (scaled down to a reasonable max) so we can re-crop later
+        const maxSide = 600;
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Render a cropped dataURL from a source image based on crop params {cx, cy, zoom}
+// cx, cy are the center of the crop in normalized [0,1] image coords
+// zoom = 1 means the crop square equals min(width, height); higher = more zoomed in
+function renderCroppedPortrait(sourceDataUrl, crop, size = 200) {
+  return new Promise((resolve, reject) => {
+    if (!sourceDataUrl) return resolve(null);
+    const img = new Image();
+    img.onload = () => {
+      const c = crop || { cx: 0.5, cy: 0.5, zoom: 1 };
+      const base = Math.min(img.width, img.height);
+      const cropSize = base / c.zoom;
+      const sx = img.width * c.cx - cropSize / 2;
+      const sy = img.height * c.cy - cropSize / 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      // Fill background black in case crop extends beyond image bounds
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, size, size);
+      // Compute the portion of the crop rectangle that actually intersects the image
+      const srcX = Math.max(0, sx);
+      const srcY = Math.max(0, sy);
+      const srcRight = Math.min(img.width, sx + cropSize);
+      const srcBottom = Math.min(img.height, sy + cropSize);
+      const srcW = srcRight - srcX;
+      const srcH = srcBottom - srcY;
+      if (srcW > 0 && srcH > 0) {
+        // Map into destination space
+        const dstX = ((srcX - sx) / cropSize) * size;
+        const dstY = ((srcY - sy) / cropSize) * size;
+        const dstW = (srcW / cropSize) * size;
+        const dstH = (srcH / cropSize) * size;
+        ctx.drawImage(img, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH);
+      }
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = reject;
+    img.src = sourceDataUrl;
+  });
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function showConfirm(title, message, onConfirm) {
+  const modal = document.getElementById('modal-confirm');
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-message').textContent = message;
+  modal.classList.add('active');
+
+  const okBtn = document.getElementById('confirm-ok');
+  const cancelBtn = document.getElementById('confirm-cancel');
+
+  // Clone buttons to clear any previous listeners
+  const newOk = okBtn.cloneNode(true);
+  const newCancel = cancelBtn.cloneNode(true);
+  okBtn.parentNode.replaceChild(newOk, okBtn);
+  cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
+
+  const close = () => modal.classList.remove('active');
+  newOk.addEventListener('click', () => { close(); onConfirm(); });
+  newCancel.addEventListener('click', close);
+}
+
+// ============================================================
+// CROP EDITOR
+// ============================================================
+function openCropEditor(character) {
+  if (!character.portraitSource) return;
+  const modal = document.getElementById('modal-crop');
+  const stage = document.getElementById('crop-stage');
+  const imgEl = document.getElementById('crop-image');
+  const zoomSlider = document.getElementById('crop-zoom');
+
+  // Working copy of crop params
+  let crop = {
+    cx: character.portraitCrop?.cx ?? 0.5,
+    cy: character.portraitCrop?.cy ?? 0.5,
+    zoom: character.portraitCrop?.zoom ?? 1
+  };
+
+  // The stage displays a square area. The crop square size is:
+  //   cropSize = min(imgW, imgH) / zoom
+  // With zoom < 1, the crop can be smaller than the shorter side, giving pan room in both directions.
+  // With zoom = 1, it equals the shorter side (no pan room on the shorter axis).
+  // With zoom > 1, we zoom in further.
+
+  imgEl.onload = () => {
+    zoomSlider.value = crop.zoom;
+    updateTransform();
+    modal.classList.add('active');
+  };
+  imgEl.src = character.portraitSource;
+
+  function getStageSize() {
+    return stage.getBoundingClientRect().width;
+  }
+
+  function getBaseScale() {
+    // Scale where the shorter side equals the stage
+    const stageSize = getStageSize();
+    const shorter = Math.min(imgEl.naturalWidth, imgEl.naturalHeight);
+    return stageSize / shorter;
+  }
+
+  function updateTransform() {
+    const stageSize = getStageSize();
+    const baseScale = getBaseScale();
+    const effScale = baseScale * crop.zoom;
+    // The point (imgW * cx, imgH * cy) in image coords should land at (stageSize/2, stageSize/2)
+    const tx = stageSize / 2 - imgEl.naturalWidth * crop.cx * effScale;
+    const ty = stageSize / 2 - imgEl.naturalHeight * crop.cy * effScale;
+    imgEl.style.transform = `translate(${tx}px, ${ty}px) scale(${effScale})`;
+  }
+
+  function clampCrop() {
+    // No clamping — user can pan anywhere, including fully off the image.
+    // The cropped output will show black where the crop extends beyond the image.
+  }
+
+  // Zoom slider
+  const onZoom = () => {
+    crop.zoom = parseFloat(zoomSlider.value);
+    clampCrop();
+    updateTransform();
+  };
+  zoomSlider.oninput = onZoom;
+
+  // Drag to pan
+  let dragging = false, startX = 0, startY = 0, startCx = 0, startCy = 0;
+
+  const onDown = (e) => {
+    e.preventDefault();
+    dragging = true;
+    stage.classList.add('grabbing');
+    const pt = e.touches ? e.touches[0] : e;
+    startX = pt.clientX;
+    startY = pt.clientY;
+    startCx = crop.cx;
+    startCy = crop.cy;
+  };
+
+  const onMove = (e) => {
+    if (!dragging) return;
+    e.preventDefault();
+    const pt = e.touches ? e.touches[0] : e;
+    const dx = pt.clientX - startX;
+    const dy = pt.clientY - startY;
+    const effScale = getBaseScale() * crop.zoom;
+    crop.cx = startCx - dx / (imgEl.naturalWidth * effScale);
+    crop.cy = startCy - dy / (imgEl.naturalHeight * effScale);
+    clampCrop();
+    updateTransform();
+  };
+
+  const onUp = () => {
+    dragging = false;
+    stage.classList.remove('grabbing');
+  };
+
+  // Wheel to zoom
+  const onWheel = (e) => {
+    e.preventDefault();
+    const delta = -e.deltaY * 0.003;
+    crop.zoom = Math.max(0.3, Math.min(5, crop.zoom + delta));
+    zoomSlider.value = crop.zoom;
+    clampCrop();
+    updateTransform();
+  };
+
+  stage.addEventListener('mousedown', onDown);
+  stage.addEventListener('touchstart', onDown, { passive: false });
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('mouseup', onUp);
+  document.addEventListener('touchend', onUp);
+  stage.addEventListener('wheel', onWheel, { passive: false });
+
+  // Buttons
+  const resetBtn = document.getElementById('crop-reset');
+  const saveBtn = document.getElementById('crop-save');
+
+  // Clone to clear previous listeners
+  const newReset = resetBtn.cloneNode(true);
+  const newSave = saveBtn.cloneNode(true);
+  resetBtn.parentNode.replaceChild(newReset, resetBtn);
+  saveBtn.parentNode.replaceChild(newSave, saveBtn);
+
+  newReset.addEventListener('click', () => {
+    crop = { cx: 0.5, cy: 0.5, zoom: 1 };
+    zoomSlider.value = 1;
+    updateTransform();
+  });
+
+  const cleanup = () => {
+    stage.removeEventListener('mousedown', onDown);
+    stage.removeEventListener('touchstart', onDown);
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    document.removeEventListener('touchend', onUp);
+    stage.removeEventListener('wheel', onWheel);
+    modal.classList.remove('active');
+  };
+
+  newSave.addEventListener('click', async () => {
+    character.portraitCrop = { ...crop };
+    character.portrait = await renderCroppedPortrait(character.portraitSource, crop);
+    // Update IDB record with new thumbnail and crop
+    if (character.portraitId) {
+      try {
+        await idbPutPortrait({
+          id: character.portraitId,
+          source: character.portraitSource,
+          thumbnail: character.portrait,
+          crop: character.portraitCrop
+        });
+      } catch (err) {
+        console.error('IDB update failed:', err);
+      }
+    }
+    cleanup();
+    renderCharacterList();
+    renderCanvas();
+    renderDetailPanel();
+    toast('✓ Portrait updated');
+  });
+
+  // Close via backdrop or X button
+  modal.querySelectorAll('[data-close]').forEach(el => {
+    el.addEventListener('click', cleanup, { once: true });
+  });
+  modal.addEventListener('click', function handler(e) {
+    if (e.target === modal) {
+      cleanup();
+      modal.removeEventListener('click', handler);
+    }
+  });
+}
+
+// ============================================================
+// CHARACTER / FACTION MANAGEMENT
+// ============================================================
+function addCharacter(name, factionId = null) {
+  if (!name || !name.trim()) return;
+  let defaultPos;
+  if (state.type === '3d') defaultPos = [1/3, 1/3, 1/3];
+  else if (state.type === 'custom') defaultPos = state.axes.map(() => 0.5);
+  else if (state.type === '9stack') defaultPos = [0, 0, 0]; // x=0, y=0, layer=0
+  else defaultPos = state.axes.map(() => 0);
+  state.characters.push({
+    id: uid(),
+    name: name.trim(),
+    pos: defaultPos,
+    factionId: factionId || null,
+    notes: '',
+    portraitId: null,      // IndexedDB key (persisted in localStorage save)
+    portrait: null,        // rendered thumbnail dataURL (in-memory only)
+    portraitSource: null,  // original source dataURL (in-memory only)
+    portraitCrop: null     // { cx, cy, zoom } (persisted in localStorage save)
+  });
+}
+
+function addFaction() {
+  const color = FACTION_COLORS[state.factions.length % FACTION_COLORS.length];
+  state.factions.push({
+    id: uid(),
+    name: `Faction ${state.factions.length + 1}`,
+    color
+  });
+}
+
+// ============================================================
+// SAVE / LOAD (uses window.storage with localStorage fallback)
+// ============================================================
+async function saveFramework() {
+  const name = state.name || 'Untitled';
+  // Strip heavy in-memory portrait data (source + thumbnail dataURLs).
+  // Keep only portraitId (IDB pointer) and portraitCrop. Everything else
+  // gets rehydrated from IndexedDB on load.
+  const slimChars = state.characters.map(c => ({
+    id: c.id,
+    name: c.name,
+    pos: c.pos,
+    factionId: c.factionId,
+    notes: c.notes,
+    portraitId: c.portraitId || null,
+    portraitCrop: c.portraitCrop || null
+  }));
+  const saveData = {
+    name, type: state.type, axes: state.axes,
+    characters: slimChars, factions: state.factions,
+    stackLayers: state.stackLayers || null,
+    gridSize: state.gridSize || 3,
+    savedAt: new Date().toISOString()
+  };
+
+  try {
+    if (typeof window.storage !== 'undefined' && window.storage.set) {
+      const key = `framework:${uid()}`;
+      await window.storage.set(key, JSON.stringify(saveData));
+    } else {
+      // localStorage fallback
+      const saves = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      saves.push({ key: `framework:${uid()}`, ...saveData });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saves));
+    }
+    toast('✓ Framework saved');
+  } catch (err) {
+    console.error(err);
+    toast('⚠ Save failed');
+  }
+}
+
+async function listSaves() {
+  try {
+    if (typeof window.storage !== 'undefined' && window.storage.list) {
+      const res = await window.storage.list('framework:');
+      if (!res || !res.keys) return [];
+      const saves = [];
+      for (const key of res.keys) {
+        try {
+          const r = await window.storage.get(key);
+          if (r && r.value) saves.push({ key, ...JSON.parse(r.value) });
+        } catch(e) { /* skip */ }
+      }
+      return saves;
+    } else {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    }
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+}
+
+async function loadFramework(key) {
+  try {
+    let data;
+    if (typeof window.storage !== 'undefined' && window.storage.get) {
+      const r = await window.storage.get(key);
+      data = r ? JSON.parse(r.value) : null;
+    } else {
+      const saves = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      data = saves.find(s => s.key === key);
+    }
+    if (!data) { toast('⚠ Not found'); return; }
+
+    state.name = data.name;
+    state.type = data.type;
+    state.axes = data.axes;
+    state.characters = data.characters || [];
+    state.factions = data.factions || [];
+    state.selectedCharId = null;
+    state.customAxisCount = state.axes.length;
+    state.stackLayers = data.stackLayers || ['Low', 'Neutral', 'High'];
+    state.gridSize = data.gridSize || 3;
+
+    // Rehydrate portraits from IndexedDB
+    await Promise.all(state.characters.map(async (c) => {
+      // Initialize in-memory fields (may be missing from older saves)
+      c.portrait = null;
+      c.portraitSource = null;
+      if (c.portraitId) {
+        try {
+          const rec = await idbGetPortrait(c.portraitId);
+          if (rec) {
+            c.portraitSource = rec.source;
+            c.portrait = rec.thumbnail;
+            c.portraitCrop = rec.crop || c.portraitCrop;
+          }
+        } catch (err) {
+          console.error('Portrait rehydrate failed for', c.portraitId, err);
+        }
+      }
+    }));
+
+    document.getElementById('framework-name').value = state.name;
+    document.querySelectorAll('.type-option').forEach(el => {
+      el.classList.toggle('active', el.dataset.type === state.type);
+    });
+    renderAll();
+    document.getElementById('modal-load').classList.remove('active');
+    toast('✓ Framework loaded');
+  } catch (err) {
+    console.error(err);
+    toast('⚠ Load failed');
+  }
+}
+
+async function deleteSave(key) {
+  try {
+    if (typeof window.storage !== 'undefined' && window.storage.delete) {
+      await window.storage.delete(key);
+    } else {
+      const saves = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saves.filter(s => s.key !== key)));
+    }
+    await openLoadModal();
+  } catch (err) { console.error(err); }
+}
+
+async function openLoadModal() {
+  const saves = await listSaves();
+  const list = document.getElementById('saved-list');
+  if (saves.length === 0) {
+    list.innerHTML = '<p class="detail-empty">No saved frameworks yet.</p>';
+  } else {
+    list.innerHTML = '';
+    saves.sort((a,b) => (b.savedAt || '').localeCompare(a.savedAt || ''));
+    saves.forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'saved-item';
+      const dateStr = s.savedAt ? new Date(s.savedAt).toLocaleString() : '';
+      div.innerHTML = `
+        <div class="saved-item-info">
+          <h3>${escapeHtml(s.name)}</h3>
+          <p>${(s.characters || []).length} characters · ${s.type} · ${dateStr}</p>
+        </div>
+        <div style="display:flex;gap:0.4rem;">
+          <button class="ghost tiny" data-load="${s.key}">Load</button>
+          <button class="ghost tiny danger" data-delete="${s.key}">✕</button>
+        </div>
+      `;
+      div.querySelector('[data-load]').onclick = () => loadFramework(s.key);
+      div.querySelector('[data-delete]').onclick = () => deleteSave(s.key);
+      list.appendChild(div);
+    });
+  }
+  document.getElementById('modal-load').classList.add('active');
+}
+
+// ============================================================
+// EXPORT AS PNG
+// ============================================================
+async function exportPNG() {
+  // Pre-load portrait images
+  const portraitImages = {};
+  await Promise.all(state.characters.filter(c => c.portrait).map(c => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => { portraitImages[c.id] = img; resolve(); };
+      img.onerror = () => resolve(); // skip on error
+      img.src = c.portrait;
+    });
+  }));
+
+  // 9-Stack has its own export path — draws each layer grid in a row.
+  if (state.type === '9stack') {
+    return exportStackedPNG(portraitImages);
+  }
+
+  const fieldEl = document.getElementById('field-inner');
+  const canvasEl = document.getElementById('canvas');
+  const fieldRect = fieldEl.getBoundingClientRect();
+  const canvasRect = canvasEl.getBoundingClientRect();
+  // Scale factor for hi-res
+  const scale = 2;
+  const fieldW = Math.round(fieldRect.width * scale);
+  const fieldH = Math.round(fieldRect.height * scale);
+  // Outer dimensions (includes label padding area)
+  const outerW = Math.round(canvasRect.width * scale);
+  const outerH = Math.round(canvasRect.height * scale);
+  // Offsets of field within canvas
+  const offsetX = Math.round((fieldRect.left - canvasRect.left) * scale);
+  const offsetY = Math.round((fieldRect.top - canvasRect.top) * scale);
+
+  const out = document.createElement('canvas');
+  out.width = outerW;
+  out.height = outerH + 130; // space for title at top
+  const ctx = out.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#1a1512';
+  ctx.fillRect(0, 0, out.width, out.height);
+
+  // Title
+  ctx.fillStyle = '#f2e8d0';
+  ctx.font = 'bold 30px "Cinzel", serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(state.name || 'Untitled Framework', out.width / 2, 48);
+  ctx.fillStyle = '#c8b896';
+  ctx.font = 'italic 18px "Cormorant Garamond", serif';
+  ctx.fillText(document.getElementById('canvas-subtitle').textContent, out.width / 2, 78);
+
+  // Draw the field and labels
+  const titleOffset = 115;
+  ctx.save();
+  ctx.translate(0, titleOffset);
+  drawFieldToCanvas(ctx, outerW, outerH, offsetX, offsetY, fieldW, fieldH, portraitImages);
+  ctx.restore();
+
+  // Watermark
+  ctx.fillStyle = 'rgba(184, 137, 58, 0.35)';
+  ctx.font = '11px "JetBrains Mono", monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText('alignments', out.width - 15, out.height - 15);
+
+  // Trigger download
+  out.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(state.name || 'framework').replace(/[^a-z0-9]+/gi, '_').toLowerCase()}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('✓ PNG exported');
+  });
+}
+
+function exportStackedPNG(portraitImages) {
+  const layers = state.stackLayers || [];
+  const [xAxis, yAxis, zAxis] = state.axes;
+  const scale = 2;
+  const gridSize = 360 * scale;    // each mini-grid
+  const gridGap = 24 * scale;
+  const labelBarH = 32 * scale;
+  const sidePad = 40 * scale;
+  const topPad = 130 * scale;      // room for title + axis annotation
+  const bottomPad = 40 * scale;
+
+  const totalW = sidePad * 2 + layers.length * gridSize + (layers.length - 1) * gridGap;
+  const totalH = topPad + labelBarH + 8 * scale + gridSize + bottomPad;
+
+  const out = document.createElement('canvas');
+  out.width = totalW;
+  out.height = totalH;
+  const ctx = out.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#1a1512';
+  ctx.fillRect(0, 0, totalW, totalH);
+
+  // Title
+  ctx.fillStyle = '#f2e8d0';
+  ctx.font = `bold ${30 * scale * 0.5}px "Cinzel", serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText(state.name || 'Untitled Framework', totalW / 2, 48 * scale * 0.5 + 15);
+  ctx.fillStyle = '#c8b896';
+  ctx.font = `italic ${18 * scale * 0.5}px "Cormorant Garamond", serif`;
+  ctx.fillText(`${layers.length} stacked 9-grids — layered by ${zAxis ? zAxis.name : ''}`, totalW / 2, 75 * scale * 0.5 + 15);
+  ctx.fillStyle = '#b8893a';
+  ctx.font = `italic ${12 * scale * 0.5}px "Cormorant Garamond", serif`;
+  ctx.fillText(`${yAxis.name} × ${xAxis.name}`, totalW / 2, 100 * scale * 0.5 + 15);
+
+  // Draw each layer grid
+  layers.forEach((layerLabel, layerIdx) => {
+    const gx = sidePad + layerIdx * (gridSize + gridGap);
+    const gy = topPad;
+
+    // Layer label bar
+    ctx.strokeStyle = 'rgba(184,137,58,0.4)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(gx, gy, gridSize, labelBarH);
+    ctx.fillStyle = 'rgba(26,21,18,0.5)';
+    ctx.fillRect(gx, gy, gridSize, labelBarH);
+    ctx.fillStyle = '#b8893a';
+    ctx.font = `bold ${13 * scale * 0.6}px "Cinzel", serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(layerLabel.toUpperCase(), gx + gridSize / 2, gy + labelBarH / 2);
+
+    // Grid itself
+    const fx = gx;
+    const fy = gy + labelBarH + 8 * scale;
+    ctx.fillStyle = 'rgba(232,220,196,0.03)';
+    ctx.fillRect(fx, fy, gridSize, gridSize);
+    ctx.strokeStyle = 'rgba(184,137,58,0.25)';
+    ctx.strokeRect(fx + 0.5, fy + 0.5, gridSize - 1, gridSize - 1);
+
+    // Grid thirds
+    ctx.strokeStyle = 'rgba(184,137,58,0.45)';
+    ctx.lineWidth = 2;
+    [gridSize / 3, 2 * gridSize / 3].forEach(off => {
+      ctx.beginPath(); ctx.moveTo(fx + off, fy); ctx.lineTo(fx + off, fy + gridSize); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(fx, fy + off); ctx.lineTo(fx + gridSize, fy + off); ctx.stroke();
+    });
+
+    // Pole labels (small, tucked in corners)
+    ctx.fillStyle = 'rgba(184,137,58,0.85)';
+    ctx.font = `${9 * scale * 0.7}px "Cinzel", serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(yAxis.posLabel.toUpperCase(), fx + gridSize / 2, fy + 4 * scale);
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(yAxis.negLabel.toUpperCase(), fx + gridSize / 2, fy + gridSize - 4 * scale);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(xAxis.negLabel.toUpperCase(), fx + 4 * scale, fy + gridSize / 2);
+    ctx.textAlign = 'right';
+    ctx.fillText(xAxis.posLabel.toUpperCase(), fx + gridSize - 4 * scale, fy + gridSize / 2);
+
+    // Tokens on this layer
+    state.characters.forEach(c => {
+      const charLayer = Math.round(c.pos[2] || 0);
+      if (charLayer !== layerIdx) return;
+      const tokenX = fx + ((c.pos[0] + 1) / 2) * (gridSize * 0.94) + gridSize * 0.03;
+      const tokenY = fy + (1 - (c.pos[1] + 1) / 2) * (gridSize * 0.94) + gridSize * 0.03;
+      const color = getCharColor(c);
+
+      if (c.portrait && portraitImages[c.id]) {
+        const radius = 22 * scale * 0.7;
+        const img = portraitImages[c.id];
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(tokenX, tokenY, radius, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(img, tokenX - radius, tokenY - radius, radius * 2, radius * 2);
+        ctx.restore();
+        ctx.beginPath();
+        ctx.arc(tokenX, tokenY, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = c.factionId ? color : '#1a1512';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(tokenX, tokenY, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = '#1a1512';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        // Name below
+        ctx.font = `${10 * scale * 0.7}px "Cinzel", serif`;
+        const textW = ctx.measureText(c.name).width;
+        const labelY = tokenY + radius + 10 * scale * 0.5;
+        ctx.fillStyle = 'rgba(26,21,18,0.85)';
+        ctx.fillRect(tokenX - textW / 2 - 6, labelY - 8, textW + 12, 16);
+        ctx.fillStyle = '#e8dcc4';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(c.name, tokenX, labelY);
+      } else {
+        ctx.font = `bold ${11 * scale * 0.7}px "Cinzel", serif`;
+        const textW = ctx.measureText(c.name).width;
+        const padX = 10;
+        const pillW = textW + padX * 2;
+        const pillH = 22 * scale * 0.7;
+        const r = pillH / 2;
+        ctx.beginPath();
+        ctx.moveTo(tokenX - pillW / 2 + r, tokenY - pillH / 2);
+        ctx.lineTo(tokenX + pillW / 2 - r, tokenY - pillH / 2);
+        ctx.arc(tokenX + pillW / 2 - r, tokenY, r, -Math.PI / 2, Math.PI / 2);
+        ctx.lineTo(tokenX - pillW / 2 + r, tokenY + pillH / 2);
+        ctx.arc(tokenX - pillW / 2 + r, tokenY, r, Math.PI / 2, -Math.PI / 2);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.strokeStyle = '#1a1512';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = getContrastColor(color);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(c.name, tokenX, tokenY);
+      }
+    });
+  });
+
+  // Watermark
+  ctx.fillStyle = 'rgba(184, 137, 58, 0.35)';
+  ctx.font = `${11 * scale * 0.5}px "JetBrains Mono", monospace`;
+  ctx.textAlign = 'right';
+  ctx.fillText('alignments', totalW - 15, totalH - 15);
+
+  out.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(state.name || 'framework').replace(/[^a-z0-9]+/gi, '_').toLowerCase()}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('✓ PNG exported');
+  });
+}
+
+function drawFieldToCanvas(ctx, outerW, outerH, offX, offY, W, H, portraitImages = {}) {
+  // Draw field inset within outer canvas
+  ctx.save();
+  ctx.translate(offX, offY);
+
+  // Field background
+  ctx.fillStyle = 'rgba(232,220,196,0.03)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = 'rgba(184,137,58,0.25)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(0.5, 0.5, W-1, H-1);
+
+  ctx.strokeStyle = 'rgba(184,137,58,0.4)';
+  ctx.lineWidth = 1.5;
+
+  if (state.type === '1d') {
+    ctx.beginPath();
+    ctx.moveTo(W*0.05, H/2); ctx.lineTo(W*0.95, H/2);
+    ctx.stroke();
+    // Ticks
+    [0.05, 0.5, 0.95].forEach(t => {
+      ctx.beginPath();
+      ctx.moveTo(W*t, H/2 - 8); ctx.lineTo(W*t, H/2 + 8);
+      ctx.stroke();
+    });
+  } else if (state.type === '2d') {
+    ctx.beginPath();
+    ctx.moveTo(0, H/2); ctx.lineTo(W, H/2);
+    ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H);
+    ctx.stroke();
+    // Grid thirds (lighter)
+    ctx.strokeStyle = 'rgba(184,137,58,0.15)';
+    ctx.lineWidth = 1;
+    [W/3, 2*W/3].forEach(x => {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    });
+    [H/3, 2*H/3].forEach(y => {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    });
+  } else if (state.type === '9grid') {
+    const N = state.gridSize || 3;
+    // Bolder divisions for the N×N grid
+    ctx.strokeStyle = 'rgba(184,137,58,0.45)';
+    ctx.lineWidth = 2;
+    for (let i = 1; i < N; i++) {
+      const x = (i / N) * W;
+      const y = (i / N) * H;
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+    // Build tier labels matching the renderer
+    const [xAxis, yAxis] = state.axes;
+    function labelsForAxis(axis, reverse) {
+      const neg = axis.negLabel || 'Low';
+      const pos = axis.posLabel || 'High';
+      let arr;
+      if (N === 2) arr = [neg, pos];
+      else if (N === 3) arr = [neg, 'Neutral', pos];
+      else if (N === 4) arr = [neg, `Mildly ${neg}`, `Mildly ${pos}`, pos];
+      else if (N === 5) arr = [neg, `Mildly ${neg}`, 'Neutral', `Mildly ${pos}`, pos];
+      else if (N === 6) arr = [neg, `Strongly ${neg}`, `Mildly ${neg}`, `Mildly ${pos}`, `Strongly ${pos}`, pos];
+      else arr = Array.from({length: N}, (_, i) => i === 0 ? neg : i === N-1 ? pos : `Tier ${i}`);
+      return reverse ? arr.slice().reverse() : arr;
+    }
+    const xLabels = labelsForAxis(xAxis, false);
+    const yLabels = labelsForAxis(yAxis, true);
+
+    ctx.fillStyle = 'rgba(184,137,58,0.85)';
+    const fontPx = N <= 3 ? 13 : N === 4 ? 11 : N === 5 ? 10 : 9;
+    ctx.font = `bold ${fontPx}px "Cinzel", serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for (let row = 0; row < N; row++) {
+      for (let col = 0; col < N; col++) {
+        const xl = xLabels[col];
+        const yl = yLabels[row];
+        let label;
+        if (xl === 'Neutral' && yl === 'Neutral') label = 'True Neutral';
+        else if (xl === 'Neutral') label = `Neutral ${yl}`;
+        else if (yl === 'Neutral') label = `${xl} Neutral`;
+        else label = `${xl} ${yl}`;
+        const cx = (col + 0.5) * W / N;
+        const cy = row * H / N + 10;
+        ctx.fillText(label.toUpperCase(), cx, cy);
+      }
+    }
+  } else if (state.type === '3d') {
+    ctx.beginPath();
+    ctx.moveTo(W*0.5, H*0.08);
+    ctx.lineTo(W*0.08, H*0.88);
+    ctx.lineTo(W*0.92, H*0.88);
+    ctx.closePath();
+    ctx.stroke();
+  } else if (state.type === 'custom') {
+    const n = state.axes.length;
+    const cx = W/2, cy = H/2, r = Math.min(W, H)*0.42;
+    [0.33, 0.66, 1].forEach(scale => {
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const angle = (Math.PI * 2 * i / n) - Math.PI/2;
+        const x = cx + Math.cos(angle) * r * scale;
+        const y = cy + Math.sin(angle) * r * scale;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = `rgba(184,137,58,${scale === 1 ? 0.4 : 0.15})`;
+      ctx.stroke();
+    });
+    ctx.strokeStyle = 'rgba(184,137,58,0.25)';
+    for (let i = 0; i < n; i++) {
+      const angle = (Math.PI * 2 * i / n) - Math.PI/2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(angle)*r, cy + Math.sin(angle)*r);
+      ctx.stroke();
+    }
+  }
+
+  // Draw tokens (portraits as circles, pills with names for no-portrait)
+  const liveField = document.getElementById('field-inner');
+  const rectW = liveField.getBoundingClientRect().width;
+  const rectH = liveField.getBoundingClientRect().height;
+  const scaleX = W / rectW;
+  const scaleY = H / rectH;
+
+  state.characters.forEach(c => {
+    const p = dataToScreen(c.pos, liveField);
+    const x = p.x * scaleX;
+    const y = p.y * scaleY;
+    const color = getCharColor(c);
+
+    if (c.portrait && portraitImages[c.id]) {
+      // Circular portrait with name below
+      const radius = 32;
+      const img = portraitImages[c.id];
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI*2);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(img, x - radius, y - radius, radius*2, radius*2);
+      ctx.restore();
+
+      // Border
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI*2);
+      ctx.strokeStyle = c.factionId ? color : '#1a1512';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI*2);
+      ctx.strokeStyle = '#1a1512';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Name label under portrait
+      ctx.font = '13px "Cinzel", serif';
+      const textW = ctx.measureText(c.name).width;
+      const labelY = y + radius + 14;
+      ctx.fillStyle = 'rgba(26, 21, 18, 0.85)';
+      ctx.fillRect(x - textW/2 - 8, labelY - 9, textW + 16, 18);
+      ctx.strokeStyle = 'rgba(184, 137, 58, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x - textW/2 - 8, labelY - 9, textW + 16, 18);
+      ctx.fillStyle = '#e8dcc4';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(c.name, x, labelY);
+    } else {
+      // Pill with name
+      ctx.font = 'bold 14px "Cinzel", serif';
+      const textW = ctx.measureText(c.name).width;
+      const padX = 14;
+      const pillW = textW + padX * 2;
+      const pillH = 26;
+      const radius = pillH / 2;
+
+      ctx.beginPath();
+      ctx.moveTo(x - pillW/2 + radius, y - pillH/2);
+      ctx.lineTo(x + pillW/2 - radius, y - pillH/2);
+      ctx.arc(x + pillW/2 - radius, y, radius, -Math.PI/2, Math.PI/2);
+      ctx.lineTo(x - pillW/2 + radius, y + pillH/2);
+      ctx.arc(x - pillW/2 + radius, y, radius, Math.PI/2, -Math.PI/2);
+      ctx.closePath();
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = '#1a1512';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      ctx.fillStyle = getContrastColor(color);
+      ctx.font = 'bold 14px "Cinzel", serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(c.name, x, y);
+    }
+  });
+
+  ctx.restore();
+
+  // Now draw axis labels in the OUTER area (outside the field, in the padding)
+  ctx.fillStyle = '#b8893a';
+  ctx.font = 'bold 14px "Cinzel", serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  const fieldLeft = offX;
+  const fieldRight = offX + W;
+  const fieldTop = offY;
+  const fieldBottom = offY + H;
+  const fieldCenterX = offX + W/2;
+  const fieldCenterY = offY + H/2;
+
+  if (state.type === '1d') {
+    ctx.font = 'italic 14px "Cormorant Garamond", serif';
+    ctx.fillStyle = '#c8b896';
+    ctx.fillText(state.axes[0].name, fieldCenterX, offY - 20);
+    ctx.fillStyle = '#b8893a';
+    ctx.font = 'bold 14px "Cinzel", serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(state.axes[0].negLabel, fieldLeft - 12, fieldCenterY);
+    ctx.textAlign = 'left';
+    ctx.fillText(state.axes[0].posLabel, fieldRight + 12, fieldCenterY);
+  } else if (state.type === '2d' || state.type === '9grid') {
+    ctx.textAlign = 'right';
+    ctx.fillText(state.axes[0].negLabel, fieldLeft - 12, fieldCenterY);
+    ctx.textAlign = 'left';
+    ctx.fillText(state.axes[0].posLabel, fieldRight + 12, fieldCenterY);
+    ctx.textAlign = 'center';
+    ctx.fillText(state.axes[1].posLabel, fieldCenterX, fieldTop - 20);
+    ctx.fillText(state.axes[1].negLabel, fieldCenterX, fieldBottom + 22);
+    // Axis names
+    ctx.fillStyle = '#c8b896';
+    ctx.font = 'italic 12px "Cormorant Garamond", serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(state.axes[1].name, 8, fieldCenterY - 14);
+    ctx.textAlign = 'center';
+    ctx.fillText(state.axes[0].name, fieldCenterX, fieldBottom + 42);
+  } else if (state.type === '3d') {
+    ctx.textAlign = 'center';
+    ctx.fillText(state.axes[0].posLabel, fieldCenterX, fieldTop - 20);
+    ctx.textAlign = 'left';
+    ctx.fillText(state.axes[1].posLabel, fieldLeft - 4, fieldBottom + 22);
+    ctx.textAlign = 'right';
+    ctx.fillText(state.axes[2].posLabel, fieldRight + 4, fieldBottom + 22);
+  } else if (state.type === 'custom') {
+    const n = state.axes.length;
+    const cx = fieldCenterX, cy = fieldCenterY;
+    const r = Math.min(W, H) * 0.42;
+    ctx.textAlign = 'center';
+    for (let i = 0; i < n; i++) {
+      const angle = (Math.PI * 2 * i / n) - Math.PI/2;
+      const lx = cx + Math.cos(angle) * (r + 30);
+      const ly = cy + Math.sin(angle) * (r + 30);
+      ctx.fillText(state.axes[i].name, lx, ly);
+    }
+  }
+}
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+function setupEventListeners() {
+  document.getElementById('framework-name').addEventListener('input', e => {
+    state.name = e.target.value;
+    renderHeader();
+  });
+
+  document.getElementById('preset-selector').addEventListener('change', e => {
+    const preset = e.target.value;
+    if (!preset) return;
+    applyPreset(preset);
+    e.target.value = ''; // reset dropdown so same preset can be re-selected
+  });
+
+  document.querySelectorAll('.type-option').forEach(el => {
+    const handleTypeChange = (e) => {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      const type = el.dataset.type;
+      if (type === state.type) return; // already active, nothing to do
+
+      const applyChange = () => {
+        document.querySelectorAll('.type-option').forEach(o => o.classList.remove('active'));
+        el.classList.add('active');
+        const oldName = state.name;
+        const oldChars = state.characters.map(c => ({
+          name: c.name,
+          factionId: c.factionId,
+          notes: c.notes,
+          portrait: c.portrait,
+          portraitSource: c.portraitSource,
+          portraitCrop: c.portraitCrop,
+          portraitId: c.portraitId
+        }));
+        const oldFactions = state.factions.slice();
+        resetToDefault(type);
+        state.name = oldName;
+        state.factions = oldFactions;
+        oldChars.forEach(oc => addCharacter(oc.name, oc.factionId));
+        // Restore notes and portrait data
+        oldChars.forEach((oc, i) => {
+          if (state.characters[i]) {
+            state.characters[i].notes = oc.notes;
+            state.characters[i].portrait = oc.portrait;
+            state.characters[i].portraitSource = oc.portraitSource;
+            state.characters[i].portraitCrop = oc.portraitCrop;
+            state.characters[i].portraitId = oc.portraitId;
+          }
+        });
+        renderAll();
+      };
+
+      if (state.characters.length > 0) {
+        showConfirm(
+          'Switch Geometry?',
+          `This will reset all character positions to the center of the new field. Your characters, factions, notes, and portraits will be preserved. Continue?`,
+          applyChange
+        );
+      } else {
+        applyChange();
+      }
+    };
+    el.addEventListener('click', handleTypeChange);
+    el.addEventListener('touchend', handleTypeChange);
+    // Keyboard support
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('role', 'button');
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleTypeChange(e);
+      }
+    });
+  });
+
+  document.getElementById('btn-add-char').addEventListener('click', () => {
+    const input = document.getElementById('new-char-name');
+    const faction = document.getElementById('new-char-faction').value;
+    if (input.value.trim()) {
+      addCharacter(input.value, faction);
+      input.value = '';
+      renderCharacterList();
+      renderCanvas();
+    }
+  });
+  document.getElementById('new-char-name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-add-char').click();
+  });
+
+  document.getElementById('btn-add-faction').addEventListener('click', () => {
+    addFaction();
+    renderFactions();
+    updateFactionDropdowns();
+  });
+
+  document.getElementById('btn-new').addEventListener('click', () => {
+    const doReset = () => {
+      resetToDefault('1d');
+      state.name = 'Untitled Framework';
+      state.factions = [];
+      document.getElementById('framework-name').value = state.name;
+      document.querySelectorAll('.type-option').forEach(o => {
+        o.classList.toggle('active', o.dataset.type === '1d');
+      });
+      renderAll();
+    };
+    if (state.characters.length > 0) {
+      showConfirm('Discard Framework?', 'This will clear all characters, factions, and axes. Make sure you\'ve saved first.', doReset);
+    } else {
+      doReset();
+    }
+  });
+
+  document.getElementById('btn-save').addEventListener('click', saveFramework);
+  document.getElementById('btn-load').addEventListener('click', openLoadModal);
+  document.getElementById('btn-export').addEventListener('click', exportPNG);
+
+  document.getElementById('btn-bulk-add').addEventListener('click', () => {
+    document.getElementById('modal-bulk').classList.add('active');
+  });
+
+  document.getElementById('btn-bulk-confirm').addEventListener('click', () => {
+    const txt = document.getElementById('bulk-names').value;
+    const faction = document.getElementById('bulk-faction').value;
+    const names = txt.split('\n').map(n => n.trim()).filter(Boolean);
+    names.forEach(n => addCharacter(n, faction));
+    document.getElementById('bulk-names').value = '';
+    document.getElementById('modal-bulk').classList.remove('active');
+    renderAll();
+    if (names.length) toast(`✓ Imported ${names.length} character${names.length === 1 ? '' : 's'}`);
+  });
+
+  document.querySelectorAll('[data-close]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.modal-backdrop').classList.remove('active');
+    });
+  });
+  document.querySelectorAll('.modal-backdrop').forEach(bd => {
+    bd.addEventListener('click', e => {
+      if (e.target === bd) bd.classList.remove('active');
+    });
+  });
+
+  // Redraw on resize
+  window.addEventListener('resize', () => renderCanvas());
+}
+
+// GO
+init();
+</script>
+</body>
+</html>
