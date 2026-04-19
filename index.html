@@ -364,6 +364,50 @@
     opacity: 0.7;
   }
 
+  .size-control {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: -0.5rem 0 1.2rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .size-control-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--bone);
+    opacity: 0.7;
+  }
+
+  .size-options {
+    display: flex;
+    border: 1px solid rgba(184, 137, 58, 0.3);
+  }
+
+  .size-btn {
+    background: transparent;
+    border: none;
+    border-right: 1px solid rgba(184, 137, 58, 0.25);
+    padding: 0.3rem 0.85rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bone);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .size-btn:last-child { border-right: none; }
+  .size-btn:hover {
+    color: var(--parchment-light);
+    background: rgba(232, 220, 196, 0.05);
+  }
+  .size-btn.active {
+    background: rgba(139, 26, 26, 0.25);
+    color: var(--parchment-light);
+  }
+
   .framework-canvas {
     position: relative;
     width: 100%;
@@ -553,6 +597,21 @@
     overflow: hidden;
   }
 
+  .token.size-small {
+    font-size: 0.55rem;
+    padding: 2px 7px;
+    min-height: 18px;
+    max-width: 110px;
+    letter-spacing: 0.02em;
+  }
+  .token.size-large {
+    font-size: 0.85rem;
+    padding: 5px 14px;
+    min-height: 30px;
+    max-width: 200px;
+    letter-spacing: 0.05em;
+  }
+
   .token.has-portrait {
     width: 44px;
     height: 44px;
@@ -565,6 +624,17 @@
     text-indent: -9999px;
     border: 2px solid var(--ink);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(184, 137, 58, 0.4);
+  }
+
+  .token.has-portrait.size-small {
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+  }
+  .token.has-portrait.size-large {
+    width: 60px;
+    height: 60px;
+    min-height: 60px;
   }
 
   .token.has-portrait::after {
@@ -1113,6 +1183,14 @@
   <section class="canvas-area">
     <div class="canvas-title" id="canvas-title">Untitled Framework</div>
     <div class="canvas-subtitle" id="canvas-subtitle">Drag characters onto the field</div>
+    <div class="size-control">
+      <span class="size-control-label">Token size</span>
+      <div class="size-options">
+        <button class="size-btn" data-size="small">Small</button>
+        <button class="size-btn active" data-size="medium">Medium</button>
+        <button class="size-btn" data-size="large">Large</button>
+      </div>
+    </div>
     <div class="framework-canvas line-1d" id="canvas"></div>
     <p class="helper-text" style="margin-top: 1rem; text-align: center;">
       Drag tokens to reposition. Click a token to select and edit.
@@ -1227,6 +1305,7 @@ const state = {
   customAxisCount: 2,
   stackLayers: ['Low', 'Neutral', 'High'], // for 9stack: labels for each layer of the stack axis
   gridSize: 3, // for 9grid: N×N (3=classic 9-grid, up to 6×6)
+  tokenSize: 'medium', // small | medium | large
 };
 
 const FACTION_COLORS = ['#e8dcc4', '#8b1a1a', '#b8893a', '#4a5c3a', '#2a3a5c', '#6b2e8c', '#c8551b', '#2e7a6b'];
@@ -2097,7 +2176,8 @@ function renderCanvasCustom(canvas, field) {
 function createToken(c) {
   const token = document.createElement('div');
   const hasPortrait = !!c.portrait;
-  token.className = 'token' + (c.id === state.selectedCharId ? ' selected' : '') + (hasPortrait ? ' has-portrait' : '');
+  const sizeClass = ' size-' + (state.tokenSize || 'medium');
+  token.className = 'token' + (c.id === state.selectedCharId ? ' selected' : '') + (hasPortrait ? ' has-portrait' : '') + sizeClass;
   token.dataset.charId = c.id;
   token.dataset.name = c.name;
   token.title = c.name;
@@ -2864,6 +2944,7 @@ async function saveFramework() {
     characters: slimChars, factions: state.factions,
     stackLayers: state.stackLayers || null,
     gridSize: state.gridSize || 3,
+    tokenSize: state.tokenSize || 'medium',
     savedAt: new Date().toISOString()
   };
 
@@ -2927,6 +3008,7 @@ async function loadFramework(key) {
     state.customAxisCount = state.axes.length;
     state.stackLayers = data.stackLayers || ['Low', 'Neutral', 'High'];
     state.gridSize = data.gridSize || 3;
+    state.tokenSize = data.tokenSize || 'medium';
 
     // Rehydrate portraits from IndexedDB
     await Promise.all(state.characters.map(async (c) => {
@@ -2950,6 +3032,9 @@ async function loadFramework(key) {
     document.getElementById('framework-name').value = state.name;
     document.querySelectorAll('.type-option').forEach(el => {
       el.classList.toggle('active', el.dataset.type === state.type);
+    });
+    document.querySelectorAll('.size-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.size === state.tokenSize);
     });
     renderAll();
     document.getElementById('modal-load').classList.remove('active');
@@ -3511,6 +3596,14 @@ function setupEventListeners() {
   document.getElementById('framework-name').addEventListener('input', e => {
     state.name = e.target.value;
     renderHeader();
+  });
+
+  document.querySelectorAll('.size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.tokenSize = btn.dataset.size;
+      document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b === btn));
+      renderCanvas();
+    });
   });
 
   document.getElementById('preset-selector').addEventListener('change', e => {
