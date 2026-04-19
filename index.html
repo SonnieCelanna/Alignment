@@ -364,50 +364,6 @@
     opacity: 0.7;
   }
 
-  .size-control {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: -0.5rem 0 1.2rem;
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  .size-control-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--bone);
-    opacity: 0.7;
-  }
-
-  .size-options {
-    display: flex;
-    border: 1px solid rgba(184, 137, 58, 0.3);
-  }
-
-  .size-btn {
-    background: transparent;
-    border: none;
-    border-right: 1px solid rgba(184, 137, 58, 0.25);
-    padding: 0.3rem 0.85rem;
-    font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--bone);
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .size-btn:last-child { border-right: none; }
-  .size-btn:hover {
-    color: var(--parchment-light);
-    background: rgba(232, 220, 196, 0.05);
-  }
-  .size-btn.active {
-    background: rgba(139, 26, 26, 0.25);
-    color: var(--parchment-light);
-  }
-
   .framework-canvas {
     position: relative;
     width: 100%;
@@ -570,10 +526,11 @@
 
   /* CHARACTER TOKENS */
   .token {
+    --size-mult: 1;
     position: absolute;
     height: auto;
-    min-height: 24px;
-    padding: 3px 10px;
+    min-height: calc(24px * var(--size-mult));
+    padding: calc(3px * var(--size-mult)) calc(10px * var(--size-mult));
     border-radius: 999px;
     background: var(--parchment);
     color: var(--ink);
@@ -581,7 +538,7 @@
     align-items: center;
     justify-content: center;
     font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
+    font-size: calc(0.65rem * var(--size-mult));
     font-weight: 500;
     cursor: grab;
     transform: translate(-50%, -50%);
@@ -592,30 +549,15 @@
     user-select: none;
     letter-spacing: 0.03em;
     white-space: nowrap;
-    max-width: 140px;
+    max-width: calc(140px * var(--size-mult));
     text-overflow: ellipsis;
     overflow: hidden;
   }
 
-  .token.size-small {
-    font-size: 0.55rem;
-    padding: 2px 7px;
-    min-height: 18px;
-    max-width: 110px;
-    letter-spacing: 0.02em;
-  }
-  .token.size-large {
-    font-size: 0.85rem;
-    padding: 5px 14px;
-    min-height: 30px;
-    max-width: 200px;
-    letter-spacing: 0.05em;
-  }
-
   .token.has-portrait {
-    width: 44px;
-    height: 44px;
-    min-height: 44px;
+    width: calc(44px * var(--size-mult));
+    height: calc(44px * var(--size-mult));
+    min-height: calc(44px * var(--size-mult));
     padding: 0;
     border-radius: 50%;
     overflow: hidden;
@@ -624,17 +566,6 @@
     text-indent: -9999px;
     border: 2px solid var(--ink);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(184, 137, 58, 0.4);
-  }
-
-  .token.has-portrait.size-small {
-    width: 32px;
-    height: 32px;
-    min-height: 32px;
-  }
-  .token.has-portrait.size-large {
-    width: 60px;
-    height: 60px;
-    min-height: 60px;
   }
 
   .token.has-portrait::after {
@@ -1183,14 +1114,6 @@
   <section class="canvas-area">
     <div class="canvas-title" id="canvas-title">Untitled Framework</div>
     <div class="canvas-subtitle" id="canvas-subtitle">Drag characters onto the field</div>
-    <div class="size-control">
-      <span class="size-control-label">Token size</span>
-      <div class="size-options">
-        <button class="size-btn" data-size="small">Small</button>
-        <button class="size-btn active" data-size="medium">Medium</button>
-        <button class="size-btn" data-size="large">Large</button>
-      </div>
-    </div>
     <div class="framework-canvas line-1d" id="canvas"></div>
     <p class="helper-text" style="margin-top: 1rem; text-align: center;">
       Drag tokens to reposition. Click a token to select and edit.
@@ -1305,7 +1228,6 @@ const state = {
   customAxisCount: 2,
   stackLayers: ['Low', 'Neutral', 'High'], // for 9stack: labels for each layer of the stack axis
   gridSize: 3, // for 9grid: N×N (3=classic 9-grid, up to 6×6)
-  tokenSize: 'medium', // small | medium | large
 };
 
 const FACTION_COLORS = ['#e8dcc4', '#8b1a1a', '#b8893a', '#4a5c3a', '#2a3a5c', '#6b2e8c', '#c8551b', '#2e7a6b'];
@@ -2176,11 +2098,13 @@ function renderCanvasCustom(canvas, field) {
 function createToken(c) {
   const token = document.createElement('div');
   const hasPortrait = !!c.portrait;
-  const sizeClass = ' size-' + (state.tokenSize || 'medium');
-  token.className = 'token' + (c.id === state.selectedCharId ? ' selected' : '') + (hasPortrait ? ' has-portrait' : '') + sizeClass;
+  token.className = 'token' + (c.id === state.selectedCharId ? ' selected' : '') + (hasPortrait ? ' has-portrait' : '');
   token.dataset.charId = c.id;
   token.dataset.name = c.name;
   token.title = c.name;
+  // Per-character size multiplier (default 1.0, range ~0.5 to 2.5)
+  const mult = typeof c.sizeMult === 'number' ? c.sizeMult : 1;
+  token.style.setProperty('--size-mult', mult);
 
   if (hasPortrait) {
     token.style.backgroundImage = `url('${c.portrait}')`;
@@ -2274,6 +2198,10 @@ function renderDetailPanel() {
     </div>
     <div class="coords-display">${formatCoords(c.pos)}</div>
     ${coordControls}
+    <div class="coord-slider-row" style="margin-top: 0.75rem;">
+      <label><span>Token Size</span><span style="opacity:0.6;">${((typeof c.sizeMult === 'number' ? c.sizeMult : 1) * 100).toFixed(0)}%</span></label>
+      <input type="range" id="detail-size-mult" min="0.5" max="2.5" step="0.05" value="${typeof c.sizeMult === 'number' ? c.sizeMult : 1}">
+    </div>
     <div class="field-row" style="margin-top: 0.75rem;">
       <label>Notes</label>
       <textarea id="detail-notes" placeholder="Motivations, secrets, quirks...">${escapeHtml(c.notes || '')}</textarea>
@@ -2360,6 +2288,18 @@ function renderDetailPanel() {
   });
   document.getElementById('detail-notes').addEventListener('input', e => {
     c.notes = e.target.value;
+  });
+  document.getElementById('detail-size-mult').addEventListener('input', e => {
+    c.sizeMult = parseFloat(e.target.value);
+    // Update the percentage display live
+    const row = e.target.closest('.coord-slider-row');
+    if (row) {
+      const pct = row.querySelector('label span:last-child');
+      if (pct) pct.textContent = `${(c.sizeMult * 100).toFixed(0)}%`;
+    }
+    // Update just this token's size without a full canvas re-render
+    const token = document.querySelector(`.token[data-char-id="${c.id}"]`);
+    if (token) token.style.setProperty('--size-mult', c.sizeMult);
   });
   document.getElementById('detail-delete').addEventListener('click', async () => {
     if (c.portraitId) {
@@ -2906,6 +2846,7 @@ function addCharacter(name, factionId = null) {
     pos: defaultPos,
     factionId: factionId || null,
     notes: '',
+    sizeMult: 1,           // per-character size multiplier (0.5 to 2.5)
     portraitId: null,      // IndexedDB key (persisted in localStorage save)
     portrait: null,        // rendered thumbnail dataURL (in-memory only)
     portraitSource: null,  // original source dataURL (in-memory only)
@@ -2936,6 +2877,7 @@ async function saveFramework() {
     pos: c.pos,
     factionId: c.factionId,
     notes: c.notes,
+    sizeMult: typeof c.sizeMult === 'number' ? c.sizeMult : 1,
     portraitId: c.portraitId || null,
     portraitCrop: c.portraitCrop || null
   }));
@@ -2944,7 +2886,6 @@ async function saveFramework() {
     characters: slimChars, factions: state.factions,
     stackLayers: state.stackLayers || null,
     gridSize: state.gridSize || 3,
-    tokenSize: state.tokenSize || 'medium',
     savedAt: new Date().toISOString()
   };
 
@@ -3008,7 +2949,6 @@ async function loadFramework(key) {
     state.customAxisCount = state.axes.length;
     state.stackLayers = data.stackLayers || ['Low', 'Neutral', 'High'];
     state.gridSize = data.gridSize || 3;
-    state.tokenSize = data.tokenSize || 'medium';
 
     // Rehydrate portraits from IndexedDB
     await Promise.all(state.characters.map(async (c) => {
@@ -3032,9 +2972,6 @@ async function loadFramework(key) {
     document.getElementById('framework-name').value = state.name;
     document.querySelectorAll('.type-option').forEach(el => {
       el.classList.toggle('active', el.dataset.type === state.type);
-    });
-    document.querySelectorAll('.size-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.size === state.tokenSize);
     });
     renderAll();
     document.getElementById('modal-load').classList.remove('active');
@@ -3596,14 +3533,6 @@ function setupEventListeners() {
   document.getElementById('framework-name').addEventListener('input', e => {
     state.name = e.target.value;
     renderHeader();
-  });
-
-  document.querySelectorAll('.size-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      state.tokenSize = btn.dataset.size;
-      document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b === btn));
-      renderCanvas();
-    });
   });
 
   document.getElementById('preset-selector').addEventListener('change', e => {
