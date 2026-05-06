@@ -1228,6 +1228,7 @@ const state = {
   customAxisCount: 2,
   stackLayers: ['Low', 'Neutral', 'High'], // for 9stack: labels for each layer of the stack axis
   gridSize: 3, // for 9grid: N×N (3=classic 9-grid, up to 6×6)
+  cellLabelOverrides: {}, // for 9grid: map of "row,col" -> custom label string
 };
 
 const FACTION_COLORS = ['#e8dcc4', '#8b1a1a', '#b8893a', '#4a5c3a', '#2a3a5c', '#6b2e8c', '#c8551b', '#2e7a6b'];
@@ -1503,7 +1504,7 @@ function updateGeometryHint() {
   const hints = {
     '1d': 'A single spectrum between two opposing poles.',
     '2d': 'Two perpendicular axes forming a continuous plane.',
-    '9grid': 'Classic D&D-style nine named regions — Lawful/Neutral/Chaotic × Good/Neutral/Evil.',
+    '9grid': 'Named regions auto-compose from your axes. Click any cell label to rename it.',
     '9stack': 'Multiple 9-grids side by side, layered by a third axis. Great for factional worlds.',
     '3d': 'Three forces in tension, plotted on a triangular field.',
     'custom': 'Radar-style chart with any number of axes.'
@@ -1890,31 +1891,39 @@ function renderCanvas9Grid(canvas, field) {
   for (let row = 0; row < N; row++) {
     for (let col = 0; col < N; col++) {
       // Compose cell label — prefer shorter forms when both are "Neutral"
-      let cellLabel;
+      let composedLabel;
       const xl = xLabels[col];
       const yl = yLabels[row];
       if (xl === 'Neutral' && yl === 'Neutral') {
-        cellLabel = 'True Neutral';
+        composedLabel = 'True Neutral';
       } else if (xl === 'Neutral') {
-        cellLabel = `Neutral ${yl}`;
+        composedLabel = `Neutral ${yl}`;
       } else if (yl === 'Neutral') {
-        cellLabel = `${xl} Neutral`;
+        composedLabel = `${xl} Neutral`;
       } else {
-        cellLabel = `${xl} ${yl}`;
+        composedLabel = `${xl} ${yl}`;
       }
+
+      // Check for user-defined override
+      const overrideKey = `${row},${col}`;
+      const override = state.cellLabelOverrides && state.cellLabelOverrides[overrideKey];
+      const cellLabel = override !== undefined ? override : composedLabel;
+      const isOverridden = override !== undefined;
 
       const cellPctW = 100 / N;
       const left = (col / N) * 100;
       const top = (row / N) * 100;
       // Scale font size down a bit when grid is dense
       const fontSize = N <= 3 ? '0.72rem' : N === 4 ? '0.62rem' : N === 5 ? '0.55rem' : '0.5rem';
-      field.insertAdjacentHTML('beforeend', `
-        <div class="grid-cell-label" style="position:absolute;top:${top}%;left:${left}%;width:${cellPctW}%;height:${cellPctW}%;display:flex;align-items:flex-start;justify-content:center;pointer-events:none;padding-top:6px;">
-          <span style="font-family:'Cinzel',serif;font-size:${fontSize};letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);opacity:0.7;text-align:center;line-height:1.1;max-width:92%;">
-            ${escapeHtml(cellLabel)}
-          </span>
-        </div>
-      `);
+      const cellWrap = document.createElement('div');
+      cellWrap.className = 'grid-cell-label';
+      cellWrap.style.cssText = `position:absolute;top:${top}%;left:${left}%;width:${cellPctW}%;height:${cellPctW}%;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;`;
+      cellWrap.innerHTML = `
+        <span class="cell-label-text" data-row="${row}" data-col="${col}" style="font-family:'Cinzel',serif;font-size:${fontSize};letter-spacing:0.08em;text-transform:uppercase;color:${isOverridden ? 'var(--gold-bright)' : 'var(--gold)'};opacity:${isOverridden ? 0.95 : 0.7};text-align:center;line-height:1.1;max-width:92%;cursor:text;padding:2px 4px;border-radius:2px;pointer-events:auto;" title="Click to rename this cell">
+          ${escapeHtml(cellLabel)}
+        </span>
+      `;
+      field.appendChild(cellWrap);
     }
   }
 
@@ -1923,6 +1932,49 @@ function renderCanvas9Grid(canvas, field) {
     <div class="axis-label italic" style="top:16px;left:12px;font-size:0.7rem;opacity:0.6;">${escapeHtml(yAxis.name)}</div>
     <div class="axis-label italic" style="bottom:16px;right:12px;font-size:0.7rem;opacity:0.6;">${escapeHtml(xAxis.name)}</div>
   `);
+
+  // Wire up click-to-edit on each cell label
+  field.querySelectorAll('.cell-label-text').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      startCellLabelEdit(el);
+    });
+  });
+}
+
+function startCellLabelEdit(spanEl) {
+  const row = parseInt(spanEl.dataset.row);
+  const col = parseInt(spanEl.dataset.col);
+  const currentText = spanEl.textContent.trim();
+  // Replace span with input
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = currentText;
+  input.style.cssText = `width:90%;font-family:'Cinzel',serif;font-size:${spanEl.style.fontSize};letter-spacing:0.08em;text-transform:uppercase;color:var(--parchment-light);background:rgba(26,21,18,0.9);border:1px solid var(--gold);text-align:center;padding:2px 4px;`;
+  spanEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  const commit = (save) => {
+    if (save) {
+      const newVal = input.value.trim();
+      if (!state.cellLabelOverrides) state.cellLabelOverrides = {};
+      const key = `${row},${col}`;
+      if (newVal === '') {
+        // Empty value clears the override (reverts to auto-composed)
+        delete state.cellLabelOverrides[key];
+      } else {
+        state.cellLabelOverrides[key] = newVal;
+      }
+    }
+    renderCanvas();
+  };
+
+  input.addEventListener('blur', () => commit(true));
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); commit(true); }
+    else if (e.key === 'Escape') { e.preventDefault(); commit(false); }
+  });
 }
 
 function renderCanvas9Stack(canvas, field) {
@@ -2886,6 +2938,7 @@ async function saveFramework() {
     characters: slimChars, factions: state.factions,
     stackLayers: state.stackLayers || null,
     gridSize: state.gridSize || 3,
+    cellLabelOverrides: state.cellLabelOverrides || {},
     savedAt: new Date().toISOString()
   };
 
@@ -2949,6 +3002,7 @@ async function loadFramework(key) {
     state.customAxisCount = state.axes.length;
     state.stackLayers = data.stackLayers || ['Low', 'Neutral', 'High'];
     state.gridSize = data.gridSize || 3;
+    state.cellLabelOverrides = data.cellLabelOverrides || {};
 
     // Rehydrate portraits from IndexedDB
     await Promise.all(state.characters.map(async (c) => {
@@ -3348,6 +3402,11 @@ function drawFieldToCanvas(ctx, outerW, outerH, offX, offY, W, H, portraitImages
         else if (xl === 'Neutral') label = `Neutral ${yl}`;
         else if (yl === 'Neutral') label = `${xl} Neutral`;
         else label = `${xl} ${yl}`;
+        // Apply user override if set
+        const overrideKey = `${row},${col}`;
+        if (state.cellLabelOverrides && state.cellLabelOverrides[overrideKey] !== undefined) {
+          label = state.cellLabelOverrides[overrideKey];
+        }
         const cx = (col + 0.5) * W / N;
         const cy = row * H / N + 10;
         ctx.fillText(label.toUpperCase(), cx, cy);
