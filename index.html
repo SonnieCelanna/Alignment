@@ -524,6 +524,21 @@
     color: var(--bone);
   }
 
+  /* Editable cell labels in 9-grid: hover shows they're clickable */
+  .cell-label-text.cell-editable:hover {
+    border-color: rgba(184, 137, 58, 0.5) !important;
+    background: rgba(232, 220, 196, 0.05);
+    opacity: 1 !important;
+  }
+  .cell-label-text[contenteditable="true"] {
+    background: rgba(26, 21, 18, 0.92) !important;
+    border-color: var(--gold-bright) !important;
+    border-style: solid !important;
+    color: var(--parchment-light) !important;
+    opacity: 1 !important;
+    outline: none;
+  }
+
   /* CHARACTER TOKENS */
   .token {
     --size-mult: 1;
@@ -1229,6 +1244,7 @@ const state = {
   stackLayers: ['Low', 'Neutral', 'High'], // for 9stack: labels for each layer of the stack axis
   gridSize: 3, // for 9grid: N×N (3=classic 9-grid, up to 6×6)
   cellLabelOverrides: {}, // for 9grid: map of "row,col" -> custom label string
+  manualCellLabels: false, // for 9grid: if true, cells are directly named; pole-compose disabled
 };
 
 const FACTION_COLORS = ['#e8dcc4', '#8b1a1a', '#b8893a', '#4a5c3a', '#2a3a5c', '#6b2e8c', '#c8551b', '#2e7a6b'];
@@ -1504,7 +1520,7 @@ function updateGeometryHint() {
   const hints = {
     '1d': 'A single spectrum between two opposing poles.',
     '2d': 'Two perpendicular axes forming a continuous plane.',
-    '9grid': 'Named regions auto-compose from your axes. Click any cell label to rename it.',
+    '9grid': 'Cells auto-compose from axis poles. Toggle "Name cells directly" to label them yourself.',
     '9stack': 'Multiple 9-grids side by side, layered by a third axis. Great for factional worlds.',
     '3d': 'Three forces in tension, plotted on a triangular field.',
     'custom': 'Radar-style chart with any number of axes.'
@@ -1532,12 +1548,23 @@ function renderAxesConfig() {
           <option value="6">6×6 (36 cells)</option>
         </select>
       </div>
+      <label class="manual-cells-toggle" style="display:flex;align-items:center;gap:0.5rem;margin-top:0.6rem;font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.05em;text-transform:none;color:var(--bone);cursor:pointer;">
+        <input type="checkbox" id="manual-cells-checkbox" ${state.manualCellLabels ? 'checked' : ''} style="width:auto;margin:0;cursor:pointer;">
+        Name cells directly
+      </label>
+      <p class="helper-text" style="margin-top:0.3rem;">${state.manualCellLabels ? 'Click any cell to type its name. Pole labels are ignored.' : 'Cell names auto-compose from the axis poles below.'}</p>
     `;
     container.appendChild(sizeRow);
     const sel = sizeRow.querySelector('#grid-size-select');
     sel.value = String(state.gridSize || 3);
     sel.addEventListener('change', (e) => {
       state.gridSize = parseInt(e.target.value);
+      renderCanvas();
+    });
+    const manualCheckbox = sizeRow.querySelector('#manual-cells-checkbox');
+    manualCheckbox.addEventListener('change', (e) => {
+      state.manualCellLabels = e.target.checked;
+      renderAxesConfig(); // refresh helper text
       renderCanvas();
     });
   }
@@ -1660,10 +1687,12 @@ function renderAxesConfig() {
   }
 
   container.querySelectorAll('input[data-axis]').forEach(inp => {
-    inp.addEventListener('input', (e) => {
+    const event = inp.type === 'checkbox' ? 'change' : 'input';
+    inp.addEventListener(event, (e) => {
       const idx = parseInt(e.target.dataset.axis);
       const field = e.target.dataset.field;
-      state.axes[idx][field] = e.target.value;
+      const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+      state.axes[idx][field] = val;
       renderCanvas();
     });
   });
@@ -1887,40 +1916,53 @@ function renderCanvas9Grid(canvas, field) {
   const xLabels = labelsForAxis(xAxis, false);          // left → right = neg → pos
   const yLabels = labelsForAxis(yAxis, true);           // top → bottom = pos → neg
 
+  const manualMode = !!state.manualCellLabels;
+
   // Draw cell labels
   for (let row = 0; row < N; row++) {
     for (let col = 0; col < N; col++) {
-      // Compose cell label — prefer shorter forms when both are "Neutral"
-      let composedLabel;
-      const xl = xLabels[col];
-      const yl = yLabels[row];
-      if (xl === 'Neutral' && yl === 'Neutral') {
-        composedLabel = 'True Neutral';
-      } else if (xl === 'Neutral') {
-        composedLabel = `Neutral ${yl}`;
-      } else if (yl === 'Neutral') {
-        composedLabel = `${xl} Neutral`;
-      } else {
-        composedLabel = `${xl} ${yl}`;
-      }
-
-      // Check for user-defined override
       const overrideKey = `${row},${col}`;
       const override = state.cellLabelOverrides && state.cellLabelOverrides[overrideKey];
-      const cellLabel = override !== undefined ? override : composedLabel;
-      const isOverridden = override !== undefined;
+
+      let cellLabel;
+      let isOverridden = false;
+      let isEmpty = false;
+
+      if (manualMode) {
+        // Manual mode: only show overrides; otherwise placeholder.
+        if (override !== undefined && override !== '') {
+          cellLabel = override;
+          isOverridden = true;
+        } else {
+          cellLabel = '';
+          isEmpty = true;
+        }
+      } else {
+        // Auto-compose mode: build from axis poles.
+        const xl = xLabels[col];
+        const yl = yLabels[row];
+        if (xl === 'Neutral' && yl === 'Neutral') cellLabel = 'True Neutral';
+        else if (xl === 'Neutral') cellLabel = `Neutral ${yl}`;
+        else if (yl === 'Neutral') cellLabel = `${xl} Neutral`;
+        else cellLabel = `${xl} ${yl}`;
+      }
 
       const cellPctW = 100 / N;
       const left = (col / N) * 100;
       const top = (row / N) * 100;
-      // Scale font size down a bit when grid is dense
       const fontSize = N <= 3 ? '0.72rem' : N === 4 ? '0.62rem' : N === 5 ? '0.55rem' : '0.5rem';
       const cellWrap = document.createElement('div');
       cellWrap.className = 'grid-cell-label';
       cellWrap.style.cssText = `position:absolute;top:${top}%;left:${left}%;width:${cellPctW}%;height:${cellPctW}%;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;`;
+      const displayText = isEmpty ? '＋ Click to name' : cellLabel;
+      const labelColor = isOverridden ? 'var(--gold-bright)' : (isEmpty ? 'var(--bone)' : 'var(--gold)');
+      const labelOpacity = isEmpty ? 0.4 : (isOverridden ? 0.95 : 0.7);
+      // Only manual-mode cells are clickable. Auto-compose cells are display-only.
+      const editableCursor = manualMode ? 'text' : 'default';
+      const editableClass = manualMode ? ' cell-editable' : '';
       cellWrap.innerHTML = `
-        <span class="cell-label-text" data-row="${row}" data-col="${col}" style="font-family:'Cinzel',serif;font-size:${fontSize};letter-spacing:0.08em;text-transform:uppercase;color:${isOverridden ? 'var(--gold-bright)' : 'var(--gold)'};opacity:${isOverridden ? 0.95 : 0.7};text-align:center;line-height:1.1;max-width:92%;cursor:text;padding:2px 4px;border-radius:2px;pointer-events:auto;" title="Click to rename this cell">
-          ${escapeHtml(cellLabel)}
+        <span class="cell-label-text${editableClass}" data-row="${row}" data-col="${col}" data-empty="${isEmpty}" style="font-family:'Cinzel',serif;font-size:${fontSize};letter-spacing:0.08em;text-transform:uppercase;color:${labelColor};opacity:${labelOpacity};text-align:center;line-height:1.1;max-width:92%;cursor:${editableCursor};padding:3px 6px;border:1px dashed transparent;border-radius:2px;pointer-events:auto;transition:border-color 0.15s, background 0.15s;" ${manualMode ? 'title="Click to rename this cell"' : ''}>
+          ${escapeHtml(displayText)}
         </span>
       `;
       field.appendChild(cellWrap);
@@ -1933,35 +1975,49 @@ function renderCanvas9Grid(canvas, field) {
     <div class="axis-label italic" style="bottom:16px;right:12px;font-size:0.7rem;opacity:0.6;">${escapeHtml(xAxis.name)}</div>
   `);
 
-  // Wire up click-to-edit on each cell label
-  field.querySelectorAll('.cell-label-text').forEach(el => {
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      startCellLabelEdit(el);
+  // Wire up click-to-edit on each cell label (only in manual mode)
+  if (manualMode) {
+    field.querySelectorAll('.cell-label-text').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (el.isContentEditable) return; // already editing
+        startCellLabelEdit(el);
+      });
     });
-  });
+  }
 }
 
 function startCellLabelEdit(spanEl) {
   const row = parseInt(spanEl.dataset.row);
   const col = parseInt(spanEl.dataset.col);
-  const currentText = spanEl.textContent.trim();
-  // Replace span with input
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.value = currentText;
-  input.style.cssText = `width:90%;font-family:'Cinzel',serif;font-size:${spanEl.style.fontSize};letter-spacing:0.08em;text-transform:uppercase;color:var(--parchment-light);background:rgba(26,21,18,0.9);border:1px solid var(--gold);text-align:center;padding:2px 4px;`;
-  spanEl.replaceWith(input);
-  input.focus();
-  input.select();
+  const wasEmpty = spanEl.dataset.empty === 'true';
 
+  // Clear placeholder text so the user types into a clean field
+  if (wasEmpty) spanEl.textContent = '';
+
+  spanEl.contentEditable = 'true';
+  spanEl.spellcheck = false;
+  spanEl.focus();
+
+  // Select all text inside (skipped if we just cleared it)
+  if (!wasEmpty) {
+    const range = document.createRange();
+    range.selectNodeContents(spanEl);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  let committed = false;
   const commit = (save) => {
+    if (committed) return;
+    committed = true;
+    spanEl.contentEditable = 'false';
     if (save) {
-      const newVal = input.value.trim();
+      const newVal = spanEl.textContent.trim();
       if (!state.cellLabelOverrides) state.cellLabelOverrides = {};
       const key = `${row},${col}`;
       if (newVal === '') {
-        // Empty value clears the override (reverts to auto-composed)
         delete state.cellLabelOverrides[key];
       } else {
         state.cellLabelOverrides[key] = newVal;
@@ -1970,10 +2026,10 @@ function startCellLabelEdit(spanEl) {
     renderCanvas();
   };
 
-  input.addEventListener('blur', () => commit(true));
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); commit(true); }
-    else if (e.key === 'Escape') { e.preventDefault(); commit(false); }
+  spanEl.addEventListener('blur', () => commit(true), { once: true });
+  spanEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); spanEl.blur(); }
+    else if (e.key === 'Escape') { e.preventDefault(); committed = true; spanEl.contentEditable = 'false'; renderCanvas(); }
   });
 }
 
@@ -2939,6 +2995,7 @@ async function saveFramework() {
     stackLayers: state.stackLayers || null,
     gridSize: state.gridSize || 3,
     cellLabelOverrides: state.cellLabelOverrides || {},
+    manualCellLabels: !!state.manualCellLabels,
     savedAt: new Date().toISOString()
   };
 
@@ -3003,6 +3060,7 @@ async function loadFramework(key) {
     state.stackLayers = data.stackLayers || ['Low', 'Neutral', 'High'];
     state.gridSize = data.gridSize || 3;
     state.cellLabelOverrides = data.cellLabelOverrides || {};
+    state.manualCellLabels = !!data.manualCellLabels;
 
     // Rehydrate portraits from IndexedDB
     await Promise.all(state.characters.map(async (c) => {
@@ -3387,6 +3445,7 @@ function drawFieldToCanvas(ctx, outerW, outerH, offX, offY, W, H, portraitImages
     }
     const xLabels = labelsForAxis(xAxis, false);
     const yLabels = labelsForAxis(yAxis, true);
+    const manualMode = !!state.manualCellLabels;
 
     ctx.fillStyle = 'rgba(184,137,58,0.85)';
     const fontPx = N <= 3 ? 13 : N === 4 ? 11 : N === 5 ? 10 : 9;
@@ -3395,18 +3454,20 @@ function drawFieldToCanvas(ctx, outerW, outerH, offX, offY, W, H, portraitImages
     ctx.textBaseline = 'top';
     for (let row = 0; row < N; row++) {
       for (let col = 0; col < N; col++) {
-        const xl = xLabels[col];
-        const yl = yLabels[row];
-        let label;
-        if (xl === 'Neutral' && yl === 'Neutral') label = 'True Neutral';
-        else if (xl === 'Neutral') label = `Neutral ${yl}`;
-        else if (yl === 'Neutral') label = `${xl} Neutral`;
-        else label = `${xl} ${yl}`;
-        // Apply user override if set
         const overrideKey = `${row},${col}`;
-        if (state.cellLabelOverrides && state.cellLabelOverrides[overrideKey] !== undefined) {
-          label = state.cellLabelOverrides[overrideKey];
+        const override = state.cellLabelOverrides && state.cellLabelOverrides[overrideKey];
+        let label;
+        if (manualMode) {
+          label = (override !== undefined && override !== '') ? override : '';
+        } else {
+          const xl = xLabels[col];
+          const yl = yLabels[row];
+          if (xl === 'Neutral' && yl === 'Neutral') label = 'True Neutral';
+          else if (xl === 'Neutral') label = `Neutral ${yl}`;
+          else if (yl === 'Neutral') label = `${xl} Neutral`;
+          else label = `${xl} ${yl}`;
         }
+        if (!label) continue;
         const cx = (col + 0.5) * W / N;
         const cy = row * H / N + 10;
         ctx.fillText(label.toUpperCase(), cx, cy);
